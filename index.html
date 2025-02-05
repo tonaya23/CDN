@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Climas del Norte - Servicios Profesionales de Climatización</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <div class="container nav-container">
+            <div class="logo">
+                <div class="logo-text">CDN</div>
+                <span>Climas del Norte</span>
+            </div>
+            <div class="menu-toggle">
+                <i class="fas fa-bars"></i>
+            </div>
+            <nav>
+                <ul class="nav-links">
+                    <li><a href="#inicio">Inicio</a></li>
+                    <li><a href="#servicios">Servicios</a></li>
+                    <li><a href="#nosotros">¿Por qué Elegirnos?</a></li>
+                    <li><a href="#quienes_somos">Quienes Somos</a></li>
+                    <li><a href="#galeria">Galería</a></li>
+                    <li><a href="#testimonios">Testimonios</a></li>
+                    <li><a href="#contacto">Contacto</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero" id="inicio">
+        <div class="slider-container">
+            <div class="slider">
+                <div class="slide fade">
+                    <img src="images/pic1.jpg" alt="Climatización 1">
+                </div>
+                <div class="slide fade">
+                    <img src="images/pic2.jpg" alt="Climatización 2">
+                </div>
+                <div class="slide fade">
+                    <img src="images/pic3.jpg" alt="Climatización 3">
+                </div>
+            </div>
+            
+            <!-- Botones de navegación -->
+            <a class="prev" onclick="changeSlide(-1)">&#10094;</a>
+            <a class="next" onclick="changeSlide(1)">&#10095;</a>
+            
+            <!-- Indicadores de punto -->
+            <div class="dots">
+                <span class="dot" onclick="currentSlide(1)"></span>
+                <span class="dot" onclick="currentSlide(2)"></span>
+                <span class="dot" onclick="currentSlide(3)"></span>
+            </div>
+
+            <div class="hero-content">
+                <h1>Expertos en Climatización<br>y Confort Térmico</h1>
+                <p>Soluciones profesionales de aire acondicionado, calefacción y ventilación para hogares y empresas. Más de 20 años de experiencia nos respaldan.</p>
+                <a href="#contacto" class="cta-button">Solicitar Cotización</a>
+            </div>
+        </div>
+    </section>
+
+    <section class="services scroll-animation" id="servicios">
+        <div class="container">
+            <h2 class="section-title">Nuestros Servicios</h2>
+            <div class="services-grid">
+                <div class="service-card">
+                    <div class="service-image">
+                        <img src="img/reparacion.jpg" alt="Aire Acondicionado">
+                    </div>
+                    <div class="service-content">
+                        <h3>Reparación</h3>
+                        <p>Nuestros Técnicos están capacitados y certificados en el área de refrigeración y aire acondicionado así como en el manejo de refrigerantes.</p>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <div class="service-image">
+                        <img src="img/instalacion.jpg" alt="instalacion">
+                    </div>
+                    <div class="service-content">
+                        <h3>Instalación</h3>
+                        <p>Las instalaciones realizadas de forma profesional le garantizan un mejor rendimiento de su equipo de climatización.</p>
+                    </div>
+                </div>
+                <div class="service-card">
+                    <div class="service-image">
+                        <img src="img/mantenimiento.jpg" alt="Mantenimiento">
+                    </div>
+                    <div class="service-content">
+                        <h3>Mantenimiento</h3>
+                        <p>Un mantenimiento preventivo oportuno puede asegurarle larga vida a su equipo y un ahorro a su inversió<n class="x"></n></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="why-us scroll-animation" id="nosotros">
+        <div class="container">
+            <h2 class="section-title">¿Por Qué Elegirnos?</h2>
+            <div class="features-grid">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>Experiencia</h3>
+                    <p>Más de 20 años brindando servicios de calidad en la región.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-tools"></i>
+                    </div>
+                    <h3>Profesionalismo</h3>
+                    <p>Personal altamente capacitado y certificado.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-clock"></i>
+                    </div>
+                    <h3>Puntualidad</h3>
+                    <p>Respetamos tu tiempo y cumplimos con los plazos establecidos.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-star"></i>
+                    </div>
+                    <h3>Garantía</h3>
+                    <p>Todos nuestros servicios cuentan con garantía por escrito.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="about-us scroll-animation" id="quienes_somos">
+        <div class="container">
+            <h2 class="section-title">Quiénes Somos</h2>
+            <div class="about-content">
+                <p class="about-description">Somos una empresa líder en servicios de climatización con más de 20 años de experiencia, comprometidos con brindar soluciones de calidad y confort térmico a nuestros clientes.</p>
+                
+                <div class="pillars-grid">
+                    <div class="pillar-card">
+                        <div class="pillar-icon">
+                            <i class="fas fa-bullseye"></i>
+                        </div>
+                        <h3>Misión</h3>
+                        <p>Proporcionar soluciones integrales de climatización que mejoren la calidad de vida de nuestros clientes, garantizando eficiencia energética y satisfacción total.</p>
+                    </div>
+
+                    <div class="pillar-card">
+                        <div class="pillar-icon">
+                            <i class="fas fa-eye"></i>
+                        </div>
+                        <h3>Visión</h3>
+                        <p>Ser la empresa líder en soluciones de climatización en la región, reconocida por nuestra excelencia, innovación y compromiso con el medio ambiente.</p>
+                    </div>
+
+                    <div class="pillar-card">
+                        <div class="pillar-icon">
+                            <i class="fas fa-star"></i>
+                        </div>
+                        <h3>Valores</h3>
+                        <ul class="values-list">
+                            <li>Honestidad</li>
+                            <li>Excelencia</li>
+                            <li>Compromiso</li>
+                            <li>Innovación</li>
+                            <li>Responsabilidad</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="gallery scroll-animation" id="galeria">
+        <div class="container">
+            <h2 class="section-title">Galería de Proyectos</h2>
+            <div class="gallery-grid">
+                <div class="gallery-item">
+                    <img src="img/pic4.jpg" alt="Proyecto 1">
+                    <div class="gallery-overlay">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="img/pic5.jpg" alt="Proyecto 1">
+                    <div class="gallery-overlay">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="img/pic6.jpg" alt="Proyecto 1">
+                    <div class="gallery-overlay">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                </div>
+                <div class="gallery-item">
+                    <img src="img/pic7.jpg" alt="Proyecto 1">
+                    <div class="gallery-overlay">
+                        <i class="fas fa-search-plus"></i>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="testimonials scroll-animation" id="testimonios">
+        <div class="container">
+            <h2 class="section-title">Lo Que Dicen Nuestros Clientes</h2>
+            <div class="testimonial-slider">
+                <div class="testimonial-card">
+                    <div class="testimonial-image">
+                        <img src="img/clientefiel.jpg" alt="Cliente 1">
+                    </div>
+                    <p class="testimonial-text">"Excelente servicio, muy profesionales y puntuales. Totalmente recomendados."</p>
+                    <h4>Juan Pérez</h4>
+                    <p class="testimonial-role">Cliente Residencial</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <section class="contact scroll-animation" id="contacto">
+        <div class="container">
+            <h2 class="section-title">Contáctanos</h2>
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div>
+                            <h3>Teléfonos</h3>
+                            <p>878-763-5533</p>
+                            <p>878-795-2019</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div>
+                            <h3>Dirección</h3>
+                            <p>Venustiano Carranza No. 909 Col. Villa de Fuente</p>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div>
+                            <h3>Horario</h3>
+                            <p>Lunes a Viernes: 9:00 AM - 6:00 PM</p>
+                            <p>Sábados: 9:00 AM - 1:00 PM</p>
+                        </div>
+                    </div>
+                </div>
+                <form class="contact-form">
+                    <div class="form-group">
+                        <input type="text" class="form-control" placeholder="Nombre completo" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" class="form-control" placeholder="Correo electrónico" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" class="form-control" placeholder="Teléfono" required>
+                    </div>
+                    <div class="form-group">
+                        <select class="form-control" required>
+                            <option value="">Seleccione un servicio</option>
+                            <option value="aire">Aire Acondicionado</option>
+                            <option value="hojalateria">Hojalatería</option>
+                            <option value="soldadura">Soldadura</option>
+                            <option value="aire">Otro</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <textarea class="form-control" rows="5" placeholder="Mensaje" required></textarea>
+                    </div>
+                    <button type="submit" class="cta-button">Enviar Mensaje</button>
+                </form>
+            </div>
+        </div>
+    </section>
+
+    <footer>
+        <div class="container">
+            <div class="footer-grid">
+                <div class="footer-section">
+                    <h3>Sobre Nosotros</h3>
+                    <p>Climas del Norte es tu aliado en soluciones de climatización. Expertos en instalación y mantenimiento de sistemas de aire acondicionado.</p>
+                    <div class="social-links">
+                        <a href="#"><i class="fab fa-facebook-f"></i></a>
+                        <a href="#"><i class="fab fa-instagram"></i></a>
+                        <a href="#"><i class="fab fa-whatsapp"></i></a>
+                    </div>
+                </div>
+                <div class="footer-section">
+                    <h3>Enlaces Rápidos</h3>
+                    <ul class="footer-links">
+                        <li><a href="#inicio">Inicio</a></li>
+                        <li><a href="#servicios">Servicios</a></li>
+                        <li><a href="#galeria">Galería</a></li>
+                        <li><a href="#contacto">Contacto</a></li>
+                    </ul>
+                </div>
+                <div class="footer-section">
+                    <h3>Servicios</h3>
+                    <ul class="footer-links">
+                        <li><a href="#">Aire Acondicionado</a></li>
+                        <li><a href="#">Hojalatería</a></li>
+                        <li><a href="#">Soldadura</a></li>
+                        <li><a href="#">Mantenimiento</a></li>
+                    </ul>
+                </div>
+            </div>
+            <div class="copyright">
+                <p>&copy; 2025 Climas del Norte. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    </footer>
+
+    <a href="https://wa.me/TUNUMERO" class="whatsapp-button" target="_blank">
+        <i class="fab fa-whatsapp"></i>
+    </a>
+
+    <div class="modal" id="gallery-modal">
+        <div class="modal-content">
+            <span class="close-modal">&times;</span>
+            <img src="" alt="" class="modal-image">
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
