@@ -1,3 +1,62 @@
+<?php
+// Iniciar la sesión para manejar los datos del carrito
+session_start();
+
+// Inicializar el carrito si no existe
+if (!isset($_SESSION['carrito'])) {
+    $_SESSION['carrito'] = [];
+}
+
+// Vaciar el carrito completamente
+if (isset($_GET['vaciar'])) {
+    $_SESSION['carrito'] = [];
+    header("Location: index.php");
+    exit;
+}
+
+// Manejar agregar al carrito
+if (isset($_GET['agregar']) && !empty($_GET['agregar'])) {
+    $servicio = $_GET['agregar'];
+    $precio = 0;
+    
+    // Asignar precios según el servicio
+    switch ($servicio) {
+        case 'Reparacion':
+            $precio = 1500;
+            break;
+        case 'Instalacion':
+            $precio = 2500;
+            break;
+        case 'Mantenimiento':
+            $precio = 800;
+            break;
+    }
+    
+    // Agregar al carrito
+    $_SESSION['carrito'][] = [
+        'servicio' => $servicio,
+        'precio' => $precio
+    ];
+    
+    // Redirigir a la sección de contacto
+    header("Location: index.php#contacto");
+    exit;
+}
+
+// Eliminar un elemento del carrito
+if (isset($_GET['eliminar']) && is_numeric($_GET['eliminar']) && isset($_SESSION['carrito'][$_GET['eliminar']])) {
+    unset($_SESSION['carrito'][$_GET['eliminar']]);
+    $_SESSION['carrito'] = array_values($_SESSION['carrito']); // Reindexar el array
+    header("Location: index.php#contacto");
+    exit;
+}
+
+// Calcular total
+$total = 0;
+foreach ($_SESSION['carrito'] as $item) {
+    $total += $item['precio'];
+}
+?>
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -26,6 +85,41 @@
                     <li><a href="#galeria">Galería</a></li>
                     <li><a href="#testimonios">Testimonios</a></li>
                     <li><a href="#contacto">Contacto</a></li>
+                    <li class="cart-icon" id="cart-icon">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span class="cart-count"><?php echo count($_SESSION['carrito']); ?></span>
+                        
+                        <div class="cart-dropdown" id="cart-dropdown">
+                            <h3>Mi Carrito</h3>
+                            <?php if (empty($_SESSION['carrito'])): ?>
+                                <p class="empty-cart">Tu carrito está vacío</p>
+                            <?php else: ?>
+                                <?php foreach ($_SESSION['carrito'] as $key => $item): ?>
+                                <div class="cart-item">
+                                    <div>
+                                        <strong><?php echo $item['servicio']; ?></strong>
+                                    </div>
+                                    <div>
+                                        $<?php echo number_format($item['precio'], 2); ?>
+                                        <a href="?eliminar=<?php echo $key; ?>" class="delete-item"><i class="fas fa-trash"></i></a>
+                                    </div>
+                                </div>
+                                <?php endforeach; ?>
+                                <div class="cart-total">
+                                    <span>Total:</span>
+                                    <span>$<?php echo number_format($total, 2); ?></span>
+                                </div>
+                                <div style="text-align: center; margin-top: 15px;">
+                                    <a href="#contacto" class="add-to-cart">Completar Solicitud</a>
+                                </div>
+                            <?php endif; ?>
+                            <?php if (!empty($_SESSION['carrito'])): ?>
+                            <div style="text-align: center; margin-top: 10px;">
+                                <a href="?vaciar" class="clear-cart" style="color: red; text-decoration: underline;">Vaciar carrito</a>
+                            </div>
+                        <?php endif; ?>
+                        </div>
+                    </li>
                 </ul>
             </nav>
         </div>
@@ -75,6 +169,7 @@
                     <div class="service-content">
                         <h3>Reparación</h3>
                         <p>Nuestros Técnicos están capacitados y certificados en el área de refrigeración y aire acondicionado así como en el manejo de refrigerantes.</p>
+                        <a href="?agregar=Reparacion" class="add-to-cart">Agregar</a>
                     </div>
                 </div>
                 <div class="service-card">
@@ -84,6 +179,7 @@
                     <div class="service-content">
                         <h3>Instalación</h3>
                         <p>Las instalaciones realizadas de forma profesional le garantizan un mejor rendimiento de su equipo de climatización.</p>
+                        <a href="?agregar=Instalacion" class="add-to-cart">Agregar</a>
                     </div>
                 </div>
                 <div class="service-card">
@@ -92,7 +188,8 @@
                     </div>
                     <div class="service-content">
                         <h3>Mantenimiento</h3>
-                        <p>Un mantenimiento preventivo oportuno puede asegurarle larga vida a su equipo y un ahorro a su inversió<n class="x"></n></p>
+                        <p>Un mantenimiento preventivo oportuno puede asegurarle larga vida a su equipo y un ahorro a su inversión</p>
+                        <a href="?agregar=Mantenimiento" class="add-to-cart">Agregar</a>
                     </div>
                 </div>
             </div>
@@ -223,22 +320,87 @@
             </div>
         </div>
     </section>
-
+    <?php
+// Procesar el formulario cuando se envía
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Conexión a la base de datos
+    $conn = new mysqli("localhost", "root", "", "cdn_servicios");
+    
+    // Verificar conexión
+    if ($conn->connect_error) {
+        die("Error de conexión: " . $conn->connect_error);
+    }
+    
+    // Obtener datos del formulario
+    $nombre = $_POST['nombre'];
+    $email = $_POST['email'];
+    $telefono = $_POST['telefono'];
+    $mensaje = $_POST['mensaje'];
+    
+    // Insertar cliente
+    $sql = "INSERT INTO clientes (nombre, email, telefono) VALUES (?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("sss", $nombre, $email, $telefono);
+    $stmt->execute();
+    $cliente_id = $conn->insert_id;
+    
+    // Verificar si hay servicios en el carrito
+    if (!empty($_SESSION['carrito'])) {
+        // Calcular total
+        $total = 0;
+        foreach ($_SESSION['carrito'] as $item) {
+            $total += $item['precio'];
+        }
+        
+        // Crear pedido
+        $sql = "INSERT INTO pedidos (cliente_id, total) VALUES (?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("id", $cliente_id, $total);
+        $stmt->execute();
+        $pedido_id = $conn->insert_id;
+        
+        // Insertar detalles del pedido
+        $sql = "INSERT INTO detalle_pedidos (pedido_id, servicio, precio) VALUES (?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        
+        foreach ($_SESSION['carrito'] as $item) {
+            $stmt->bind_param("isd", $pedido_id, $item['servicio'], $item['precio']);
+            $stmt->execute();
+        }
+        
+        // Limpiar carrito
+        $_SESSION['carrito'] = [];
+        
+        // Mensaje de éxito
+        $mensaje_exito = "¡Gracias por tu solicitud! Nos pondremos en contacto contigo pronto.";
+    }
+    
+    $conn->close();
+}
+?>
     <section class="contact scroll-animation" id="contacto">
-        <div class="container">
-            <h2 class="section-title">Contáctanos</h2>
-            <div class="contact-grid">
-                <div class="contact-info">
-                    <div class="contact-item">
-                        <div class="contact-icon">
-                            <i class="fas fa-phone"></i>
-                        </div>
-                        <div>
-                            <h3>Teléfonos</h3>
-                            <p>878-763-5533</p>
-                            <p>878-795-2019</p>
-                        </div>
+    <div class="container">
+        <h2 class="section-title">Contáctanos</h2>
+        
+        <?php if(isset($mensaje_exito)): ?>
+            <div class="success-message">
+                <?php echo $mensaje_exito; ?>
+            </div>
+        <?php endif; ?>
+        
+        <div class="contact-grid">
+            <div class="contact-info">
+                <!-- Información de contacto - sin cambios -->
+                <div class="contact-item">
+                    <div class="contact-icon">
+                        <i class="fas fa-phone"></i>
                     </div>
+                    <div>
+                        <h3>Teléfonos</h3>
+                        <p>878-763-5533</p>
+                        <p>878-795-2019</p>
+                    </div>
+                </div>
                     <div class="contact-item">
                         <div class="contact-icon">
                             <i class="fas fa-map-marker-alt"></i>
@@ -259,34 +421,46 @@
                             <p>Sábados: 9:00 AM - 1:00 PM</p>
                         </div>
                     </div>
-                </div>
-                <form class="contact-form">
-                    <div class="form-group">
-                        <input type="text" class="form-control" placeholder="Nombre completo" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="email" class="form-control" placeholder="Correo electrónico" required>
-                    </div>
-                    <div class="form-group">
-                        <input type="tel" class="form-control" placeholder="Teléfono" required>
-                    </div>
-                    <div class="form-group">
-                        <select class="form-control" required>
-                            <option value="">Seleccione un servicio</option>
-                            <option value="Reparacion">Reparacion</option>
-                            <option value="Instalacion">Instalacion</option>
-                            <option value="Mantenimiento">Mantenimiento</option>
-                            <option value="otro">Otro</option>
-                        </select>
-                    </div>
-                    <div class="form-group">
-                        <textarea class="form-control" rows="5" placeholder="Mensaje" required></textarea>
-                    </div>
-                    <button type="submit" class="cta-button">Enviar Mensaje</button>
-                </form>
             </div>
+            
+            <!-- Formulario de contacto actualizado -->
+            <form class="contact-form" method="POST" action="index.php#contacto">
+                <div class="form-group">
+                    <input type="text" name="nombre" class="form-control" placeholder="Nombre completo" required>
+                </div>
+                <div class="form-group">
+                    <input type="email" name="email" class="form-control" placeholder="Correo electrónico" required>
+                </div>
+                <div class="form-group">
+                    <input type="tel" name="telefono" class="form-control" placeholder="Teléfono" required>
+                </div>
+                
+                <!-- Servicios seleccionados -->
+                <div class="selected-services">
+                    <h4>Servicios seleccionados:</h4>
+                    <?php if (empty($_SESSION['carrito'])): ?>
+                        <p>No has seleccionado ningún servicio</p>
+                    <?php else: ?>
+                        <ul>
+                            <?php foreach ($_SESSION['carrito'] as $key => $item): ?>
+                                <li>
+                                    <?php echo $item['servicio']; ?> - $<?php echo number_format($item['precio'], 2); ?>
+                                    <a href="?eliminar=<?php echo $key; ?>" class="delete-item"><i class="fas fa-times"></i></a>
+                                </li>
+                            <?php endforeach; ?>
+                        </ul>
+                        <p class="cart-total">Total: $<?php echo number_format($total, 2); ?></p>
+                    <?php endif; ?>
+                </div>
+                
+                <div class="form-group">
+                    <textarea name="mensaje" class="form-control" rows="5" placeholder="Mensaje" required></textarea>
+                </div>
+                <button type="submit" class="cta-button">Enviar Solicitud</button>
+            </form>
         </div>
-    </section>
+    </div>
+</section>
 
     <footer>
         <div class="container">
@@ -313,7 +487,7 @@
                     <h3>Servicios</h3>
                     <ul class="footer-links">
                         <li>Reparacion</li>
-                        <li>nstalacion</li>
+                        <li>Instalacion</li>
                         <li>Mantenimiento</li>
                     </ul>
                 </div>
@@ -335,5 +509,35 @@
         </div>
     </div>
     <script src="script.js"></script>
+    <script>
+        // Funcionalidad del carrito
+        document.addEventListener('DOMContentLoaded', function() {
+            const cartIcon = document.getElementById('cart-icon');
+            const cartDropdown = document.getElementById('cart-dropdown');
+            
+            // Mostrar/ocultar carrito al hacer clic
+            cartIcon.addEventListener('click', function(e) {
+                e.stopPropagation();
+                if (cartDropdown.style.display === 'block') {
+                    cartDropdown.style.display = 'none';
+                } else {
+                    cartDropdown.style.display = 'block';
+                }
+            });
+            
+            // Cerrar carrito al hacer clic fuera
+            document.addEventListener('click', function(e) {
+                if (!cartIcon.contains(e.target)) {
+                    cartDropdown.style.display = 'none';
+                }
+            });
+            
+            // Preseleccionar servicios en el formulario según carrito
+            const servicioSelect = document.getElementById('servicio-select');
+            if (servicioSelect) {
+                // Código PHP ya maneja la preselección con sus atributos "selected"
+            }
+        });
+    </script>
 </body>
 </html>
