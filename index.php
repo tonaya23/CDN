@@ -95,7 +95,7 @@ $total += $item['precio'];
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Climas del Norte - Servicios Profesionales de Climatización</title>
+    <title><?= __('Climas del Norte - Servicios Profesionales de Climatización') ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -109,28 +109,28 @@ $total += $item['precio'];
             </div>
             <div class="menu-toggle">
                 <i class="fas fa-bars"></i>
-            </div>
+            </div> 
             <div class="language-switcher">
                 <a href="?lang=es" class="<?= $_SESSION['lang'] == 'es' ? 'active' : '' ?>">ES</a> |
                 <a href="?lang=en" class="<?= $_SESSION['lang'] == 'en' ? 'active' : '' ?>">EN</a>
             </div>
             <nav>
                 <ul class="nav-links">
-                    <li><a href="#inicio">Inicio</a></li>
-                    <li><a href="#servicios">Servicios</a></li>
-                    <li><a href="#nosotros">¿Por qué Elegirnos?</a></li>
-                    <li><a href="#quienes_somos">Quienes Somos</a></li>
-                    <li><a href="#galeria">Galería</a></li>
-                    <li><a href="#testimonios">Testimonios</a></li>
-                    <li><a href="#contacto">Contacto</a></li>
+                    <li><a href="#inicio"><?= __('Inicio') ?></a></li>
+                    <li><a href="#servicios"><?= __('Servicios') ?></a></li>
+                    <li><a href="#nosotros"><?= __('¿Por qué Elegirnos?') ?></a></li>
+                    <li><a href="#quienes_somos"><?= __('Quienes Somos') ?></a></li>
+                    <li><a href="#galeria"><?= __('Galería') ?></a></li>
+                    <li><a href="#testimonios"><?= __('Testimonios') ?></a></li>
+                    <li><a href="#contacto"><?= __('Contacto') ?></a></li>
                     <li class="cart-icon" id="cart-icon">
                         <i class="fas fa-shopping-cart"></i>
                         <span class="cart-count"><?php echo count($_SESSION['carrito']); ?></span>
 
                         <div class="cart-dropdown" id="cart-dropdown">
-                            <h3>Mi Carrito</h3>
+                            <h3><?= __('Mi Carrito') ?></h3>
                             <?php if (empty($_SESSION['carrito'])): ?>
-                            <p class="empty-cart">Tu carrito está vacío</p>
+                            <p class="empty-cart"><?= __('Tu carrito está vacío') ?></p>
                             <?php else: ?>
                             <?php foreach ($_SESSION['carrito'] as $key => $item): ?>
                             <div class="cart-item">
@@ -149,13 +149,13 @@ $total += $item['precio'];
                                 <span>$<?php echo number_format($total, 2); ?></span>
                             </div>
                             <div style="text-align: center; margin-top: 15px;">
-                                <a href="#contacto" class="add-to-cart">Completar Solicitud</a>
+                                <a href="#contacto" class="add-to-cart"><?= __('Completar Solicitud') ?></a>
                             </div>
                             <?php endif; ?>
                             <?php if (!empty($_SESSION['carrito'])): ?>
                             <div style="text-align: center; margin-top: 10px;">
-                                <a href="?vaciar" class="clear-cart"
-                                    style="color: red; text-decoration: underline;">Vaciar carrito</a>
+                                <a href="?vaciar" class="clear-cart"><?= __('Vaciar carrito') ?></a>
+
                             </div>
                             <?php endif; ?>
                         </div>
@@ -193,24 +193,24 @@ $total += $item['precio'];
             <div class="hero-content">
                 <h1><?= __('Expertos en Climatización y Confort Térmico') ?></h1>
                 <p><?= __('Soluciones profesionales de aire acondicionado...') ?></p>
-                <a href="#contacto" class="cta-button">Solicitar Cotización</a>
+                <a href="#contacto" class="cta-button"><?= __('Solicitar Cotización') ?></a>
             </div>
         </div>
     </section>
 
     <section class="services scroll-animation" id="servicios">
         <div class="container">
-            <h2 class="section-title">Nuestros Servicios</h2>
+            <h2 class="section-title"><?= __('Nuestros Servicios') ?></h2>
             <div class="services-grid">
                 <div class="service-card">
                     <div class="service-image">
                         <img src="img/reparacion.jpg" alt="Aire Acondicionado">
                     </div>
                     <div class="service-content">
-                        <h3>Reparación</h3>
-                        <p>Nuestros Técnicos están capacitados y certificados en el área de refrigeración y aire
-                            acondicionado así como en el manejo de refrigerantes.</p>
-                        <a href="?agregar=Reparacion" class="add-to-cart">Agregar</a>
+                        <h3><?= __('Reparación') ?></h3>
+                        <p><?= __('Nuestros Técnicos están capacitados y certificados en el área de refrigeración y aire
+                            acondicionado así como en el manejo de refrigerantes.') ?></p>
+                        <a href="?agregar=Reparacion" class="add-to-cart"><?= __('Agregar') ?></a>
                     </div>
                 </div>
                 <div class="service-card">
@@ -218,10 +218,10 @@ $total += $item['precio'];
                         <img src="img/instalacion.jpg" alt="instalacion">
                     </div>
                     <div class="service-content">
-                        <h3>Instalación</h3>
-                        <p>Las instalaciones realizadas de forma profesional le garantizan un mejor rendimiento de su
-                            equipo de climatización.</p>
-                        <a href="?agregar=Instalacion" class="add-to-cart">Agregar</a>
+                        <h3><?= __('Instalación') ?></h3>
+                        <p><?= __('Las instalaciones realizadas de forma profesional le garantizan un mejor rendimiento de su
+                            equipo de climatización.') ?></p>
+                        <a href="?agregar=Instalacion" class="add-to-cart"><?= __('Agregar') ?></a>
                     </div>
                 </div>
                 <div class="service-card">
@@ -229,10 +229,10 @@ $total += $item['precio'];
                         <img src="img/mantenimiento.jpg" alt="Mantenimiento">
                     </div>
                     <div class="service-content">
-                        <h3>Mantenimiento</h3>
-                        <p>Un mantenimiento preventivo oportuno puede asegurarle larga vida a su equipo y un ahorro a su
-                            inversión</p>
-                        <a href="?agregar=Mantenimiento" class="add-to-cart">Agregar</a>
+                        <h3><?= __('Mantenimiento') ?></h3>
+                        <p><?= __('Un mantenimiento preventivo oportuno puede asegurarle larga vida a su equipo y un ahorro a su
+                            inversión') ?></p>
+                        <a href="?agregar=Mantenimiento" class="add-to-cart"><?= __('Agregar') ?></a>
                     </div>
                 </div>
             </div>
@@ -241,35 +241,35 @@ $total += $item['precio'];
 
     <section class="why-us scroll-animation" id="nosotros">
         <div class="container">
-            <h2 class="section-title">¿Por Qué Elegirnos?</h2>
+            <h2 class="section-title"><?= __('¿Por Qué Elegirnos?') ?></h2>
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-check-circle"></i>
                     </div>
-                    <h3>Experiencia</h3>
-                    <p>Más de 20 años brindando servicios de calidad en la región.</p>
+                    <h3><?= __('Experiencia') ?></h3>
+                    <p><?= __('Más de 20 años brindando servicios de calidad en la región.') ?></p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-tools"></i>
                     </div>
-                    <h3>Profesionalismo</h3>
-                    <p>Personal altamente capacitado y certificado.</p>
+                    <h3><?= __('Profesionalismo') ?></h3>
+                    <p><?= __('Personal altamente capacitado y certificado.') ?></p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-clock"></i>
                     </div>
-                    <h3>Puntualidad</h3>
-                    <p>Respetamos tu tiempo y cumplimos con los plazos establecidos.</p>
+                    <h3><?= __('Puntualidad') ?></h3>
+                    <p><?= __('Respetamos tu tiempo y cumplimos con los plazos establecidos.') ?></p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-star"></i>
                     </div>
-                    <h3>Garantía</h3>
-                    <p>Todos nuestros servicios cuentan con garantía por escrito.</p>
+                    <h3><?= __('Garantía') ?></h3>
+                    <p><?= __('Todos nuestros servicios cuentan con garantía por escrito.') ?></p>
                 </div>
             </div>
         </div>
@@ -277,42 +277,41 @@ $total += $item['precio'];
 
     <section class="about-us scroll-animation" id="quienes_somos">
         <div class="container">
-            <h2 class="section-title">Quiénes Somos</h2>
+            <h2 class="section-title"><?= __('Quiénes Somos') ?></h2>
             <div class="about-content">
-                <p class="about-description">Somos una empresa líder en servicios de climatización con más de 20 años de
-                    experiencia, comprometidos con brindar soluciones de calidad y confort térmico a nuestros clientes.
+                <p class="about-description">
+                    <?= __('Somos una empresa líder en servicios de climatización con más de 20 años de experiencia, comprometidos con brindar soluciones de calidad y confort térmico a nuestros clientes.') ?>
                 </p>
-
                 <div class="pillars-grid">
                     <div class="pillar-card">
                         <div class="pillar-icon">
                             <i class="fas fa-bullseye"></i>
                         </div>
-                        <h3>Misión</h3>
-                        <p>Proporcionar soluciones integrales de climatización que mejoren la calidad de vida de
-                            nuestros clientes, garantizando eficiencia energética y satisfacción total.</p>
+                        <h3><?= __('Misión') ?></h3>
+                        <p><?= __('Proporcionar soluciones integrales de climatización que mejoren la calidad de vida de nuestros clientes, garantizando eficiencia energética y satisfacción total.') ?>
+                        </p>
                     </div>
-
                     <div class="pillar-card">
                         <div class="pillar-icon">
                             <i class="fas fa-eye"></i>
                         </div>
-                        <h3>Visión</h3>
-                        <p>Ser la empresa líder en soluciones de climatización en la región, reconocida por nuestra
-                            excelencia, innovación y compromiso con el medio ambiente.</p>
+                        <h3><?= __('Visión') ?></h3>
+                        <p><?= __('Ser la empresa líder en soluciones de climatización en la región, reconocida por nuestra excelencia, innovación y compromiso con el medio ambiente.') ?>
+                        </p>
                     </div>
 
                     <div class="pillar-card">
                         <div class="pillar-icon">
                             <i class="fas fa-star"></i>
                         </div>
-                        <h3>Valores</h3>
+                        <h3><?= __('Valores') ?></h3>
                         <ul class="values-list">
-                            <li>Honestidad</li>
-                            <li>Excelencia</li>
-                            <li>Compromiso</li>
-                            <li>Innovación</li>
-                            <li>Responsabilidad</li>
+                            <li><?= __('Honestidad') ?></li>
+                            <li><?= __('Excelencia') ?></li>
+                            <li><?= __('Compromiso') ?></li>
+                            <li><?= __('Innovación') ?></li>
+                            <li><?= __('Responsabilidad') ?></li>
+                        </ul>
                         </ul>
                     </div>
                 </div>
@@ -322,7 +321,7 @@ $total += $item['precio'];
 
     <section class="gallery scroll-animation" id="galeria">
         <div class="container">
-            <h2 class="section-title">Galería de Proyectos</h2>
+            <h2 class="section-title"><?= __('Galería de Proyectos') ?></h2>
             <div class="gallery-grid">
                 <div class="gallery-item">
                     <img src="img/pic4.jpg" alt="Proyecto 1">
@@ -354,20 +353,21 @@ $total += $item['precio'];
 
     <section class="testimonials scroll-animation" id="testimonios">
         <div class="container">
-            <h2 class="section-title">Lo Que Dicen Nuestros Clientes</h2>
+            <h2 class="section-title"><?= __('Lo Que Dicen Nuestros Clientes') ?></h2>
             <div class="testimonial-slider">
                 <div class="testimonial-card">
                     <div class="testimonial-image">
                         <img src="img/clientefiel.jpg" alt="Cliente 1">
                     </div>
-                    <p class="testimonial-text">"Excelente servicio, muy profesionales y puntuales. Totalmente
-                        recomendados."</p>
+                    <p class="testimonial-text">
+                        <?= __('"Excelente servicio, muy profesionales y puntuales. Totalmente recomendados."') ?></p>
                     <h4>Juan Pérez</h4>
-                    <p class="testimonial-role">Cliente Residencial</p>
+                    <p class="testimonial-role"><?= __('Cliente Residencial') ?></p>
                 </div>
             </div>
         </div>
     </section>
+
     <?php
 // Procesar el formulario cuando se envía
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
@@ -428,8 +428,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
     <section class="contact scroll-animation" id="contacto">
         <div class="container">
-            <h2 class="section-title">Contáctanos</h2>
-
+            <h2 class="section-title"><?= __('Contáctanos') ?></h2>
+            =
             <?php if(isset($mensaje_exito)): ?>
             <div class="success-message">
                 <?php echo $mensaje_exito; ?>
@@ -444,7 +444,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <i class="fas fa-phone"></i>
                         </div>
                         <div>
-                            <h3>Teléfonos</h3>
+                            <h3><?= __('Teléfonos') ?></h3>
                             <p>878-763-5533</p>
                             <p>878-795-2019</p>
                         </div>
@@ -454,9 +454,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <i class="fas fa-map-marker-alt"></i>
                         </div>
                         <div>
-                            <h3>Dirección</h3>
-                            <p>Venustiano Carranza No. 909 Col. Villa de Fuente. Piedras Negras Coah. MX</p>
-                            <p> Sucursal: Lib. Armando Treviño 704 Col. Guillén. Piedras Negras Coah. MX</p>
+                            <h3><?= __('Dirección') ?></h3>
+                            <p><?= __('Venustiano Carranza No. 909 Col. Villa de Fuente. Piedras Negras Coah. MX') ?>
+                            </p>
+                            <p><?= __('Sucursal: Lib. Armando Treviño 704 Col. Guillén. Piedras Negras Coah. MX') ?></p>
                         </div>
                     </div>
                     <div class="contact-item">
@@ -464,30 +465,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <i class="fas fa-clock"></i>
                         </div>
                         <div>
-                            <h3>Horario</h3>
-                            <p>Lunes a Viernes: 9:00 AM - 6:00 PM</p>
-                            <p>Sábados: 9:00 AM - 1:00 PM</p>
+                            <h3><?= __('Horario') ?></h3>
+                            <p><?= __('Lunes a Viernes: 9:00 AM - 6:00 PM') ?></p>
+                            <p><?= __('Sábados: 9:00 AM - 1:00 PM') ?></p>
                         </div>
                     </div>
                 </div>
 
-                <!-- Formulario de contacto actualizado -->
                 <form class="contact-form" method="POST" action="index.php#contacto">
                     <div class="form-group">
-                        <input type="text" name="nombre" class="form-control" placeholder="Nombre completo" required>
+                        <input type="text" name="nombre" class="form-control" placeholder="<?= __('Nombre completo') ?>"
+                            required>
                     </div>
                     <div class="form-group">
-                        <input type="email" name="email" class="form-control" placeholder="Correo electrónico" required>
+                        <input type="email" name="email" class="form-control"
+                            placeholder="<?= __('Correo electrónico') ?>" required>
                     </div>
                     <div class="form-group">
-                        <input type="tel" name="telefono" class="form-control" placeholder="Teléfono" required>
+                        <input type="tel" name="telefono" class="form-control" placeholder="<?= __('Teléfono') ?>"
+                            required>
                     </div>
 
                     <!-- Servicios seleccionados -->
                     <div class="selected-services">
-                        <h4>Servicios seleccionados:</h4>
+                        <h4><?= __('Servicios seleccionados:') ?></h4>
                         <?php if (empty($_SESSION['carrito'])): ?>
-                        <p>No has seleccionado ningún servicio</p>
+                        <p><?= __('No has seleccionado ningún servicio') ?></p>
                         <?php else: ?>
                         <ul>
                             <?php foreach ($_SESSION['carrito'] as $key => $item): ?>
@@ -498,15 +501,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             </li>
                             <?php endforeach; ?>
                         </ul>
-                        <p class="cart-total">Total: $<?php echo number_format($total, 2); ?></p>
+                        <p class="cart-total"><?= __('Total:') ?> $<?php echo number_format($total, 2); ?></p>
                         <?php endif; ?>
                     </div>
 
                     <div class="form-group">
-                        <textarea name="mensaje" class="form-control" rows="5" placeholder="Mensaje"
+                        <textarea name="mensaje" class="form-control" rows="5" placeholder="<?= __('Mensaje') ?>"
                             required></textarea>
                     </div>
-                    <button type="submit" class="cta-button">Enviar Solicitud</button>
+                    <button type="submit" class="cta-button"><?= __('Enviar Solicitud') ?></button>
                 </form>
             </div>
         </div>
@@ -516,9 +519,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-section">
-                    <h3>Sobre Nosotros</h3>
-                    <p>Climas del Norte es tu aliado en soluciones de climatización. Expertos en instalación y
-                        mantenimiento de sistemas de aire acondicionado.</p>
+                    <h3><?= __('Sobre Nosotros') ?></h3>
+                    <p><?= __('Climas del Norte es tu aliado en soluciones de climatización. Expertos en instalación y mantenimiento de sistemas de aire acondicionado.') ?>
+                    </p>
                     <div class="social-links">
                         <a href="https://m.facebook.com/profile.php?id=142211439205918"><i
                                 class="fab fa-facebook-f"></i></a>
@@ -528,25 +531,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                 </div>
                 <div class="footer-section">
-                    <h3>Enlaces Rápidos</h3>
+                    <h3><?= __('Enlaces Rápidos') ?></h3>
                     <ul class="footer-links">
-                        <li><a href="#inicio">Inicio</a></li>
-                        <li><a href="#servicios">Servicios</a></li>
-                        <li><a href="#galeria">Galería</a></li>
-                        <li><a href="#contacto">Contacto</a></li>
+                        <li><a href="#inicio"><?= __('Inicio') ?></a></li>
+                        <li><a href="#servicios"><?= __('Servicios') ?></a></li>
+                        <li><a href="#galeria"><?= __('Galería') ?></a></li>
+                        <li><a href="#contacto"><?= __('Contacto') ?></a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
-                    <h3>Servicios</h3>
+                    <h3><?= __('Servicios') ?></h3>
                     <ul class="footer-links">
-                        <li>Reparacion</li>
-                        <li>Instalacion</li>
-                        <li>Mantenimiento</li>
+                        <li><?= __('Reparacion') ?></li>
+                        <li><?= __('Instalacion') ?></li>
+                        <li><?= __('Mantenimiento') ?></li>
                     </ul>
                 </div>
             </div>
             <div class="copyright">
-                <p>&copy; Soluciones Confortables S. A. de C. V. Todos los derechos reservados.</p>
+                <p>&copy; <?= __('Soluciones Confortables S. A. de C. V. Todos los derechos reservados.') ?></p>
             </div>
         </div>
     </footer>
