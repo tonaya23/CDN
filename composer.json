@@ -1,0 +1,12 @@
+{
+    "name": "tonay/cdn",
+    "authors": [
+        {
+            "name": "Angel Orozco",
+            "email": "angel.orozco.gzl@gmail.com"
+        }
+    ],
+    "require": {
+        "stichoza/google-translate-php": "^5.2"
+    }
+}

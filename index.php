@@ -1,64 +1,97 @@
 <?php
-// Iniciar la sesión para manejar los datos del carrito
 session_start();
+
+// Configuración de idioma
+if (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'es'; // Idioma por defecto
+}
+
+if (isset($_GET['lang']) && in_array($_GET['lang'], ['es', 'en'])) {
+    $_SESSION['lang'] = $_GET['lang'];
+    header("Location: ".strtok($_SERVER['REQUEST_URI'], '?')); // Elimina parámetros de URL
+    exit;
+}
+
+// Carga el autoload de Composer
+require 'vendor/autoload.php';
+
+// Función de traducción automática
+function __($text) {
+    static $translator = null;
+    
+    if ($_SESSION['lang'] == 'es') return $text; // No traducir si ya está en español
+    
+    if ($translator === null) {
+        $translator = new Stichoza\GoogleTranslate\GoogleTranslate();
+        $translator->setSource('es');
+        $translator->setTarget($_SESSION['lang']);
+    }
+    
+    try {
+        return $translator->translate($text);
+    } catch (Exception $e) {
+        return $text; // Si falla la traducción, devuelve el texto original
+    }
+}
 
 // Inicializar el carrito si no existe
 if (!isset($_SESSION['carrito'])) {
-    $_SESSION['carrito'] = [];
+$_SESSION['carrito'] = [];
 }
 
 // Vaciar el carrito completamente
 if (isset($_GET['vaciar'])) {
-    $_SESSION['carrito'] = [];
-    header("Location: index.php");
-    exit;
+$_SESSION['carrito'] = [];
+header("Location: index.php");
+exit;
 }
 
 // Manejar agregar al carrito
 if (isset($_GET['agregar']) && !empty($_GET['agregar'])) {
-    $servicio = $_GET['agregar'];
-    $precio = 0;
-    
-    // Asignar precios según el servicio
-    switch ($servicio) {
-        case 'Reparacion':
-            $precio = 1500;
-            break;
-        case 'Instalacion':
-            $precio = 2500;
-            break;
-        case 'Mantenimiento':
-            $precio = 800;
-            break;
-    }
-    
-    // Agregar al carrito
-    $_SESSION['carrito'][] = [
-        'servicio' => $servicio,
-        'precio' => $precio
-    ];
-    
-    // Redirigir a la sección de contacto
-    header("Location: index.php#contacto");
-    exit;
+$servicio = $_GET['agregar'];
+$precio = 0;
+
+// Asignar precios según el servicio
+switch ($servicio) {
+case 'Reparacion':
+$precio = 1500;
+break;
+case 'Instalacion':
+$precio = 2500;
+break;
+case 'Mantenimiento':
+$precio = 800;
+break;
+}
+
+// Agregar al carrito
+$_SESSION['carrito'][] = [
+'servicio' => $servicio,
+'precio' => $precio
+];
+
+// Redirigir a la sección de contacto
+header("Location: index.php#contacto");
+exit;
 }
 
 // Eliminar un elemento del carrito
 if (isset($_GET['eliminar']) && is_numeric($_GET['eliminar']) && isset($_SESSION['carrito'][$_GET['eliminar']])) {
-    unset($_SESSION['carrito'][$_GET['eliminar']]);
-    $_SESSION['carrito'] = array_values($_SESSION['carrito']); // Reindexar el array
-    header("Location: index.php#contacto");
-    exit;
+unset($_SESSION['carrito'][$_GET['eliminar']]);
+$_SESSION['carrito'] = array_values($_SESSION['carrito']); // Reindexar el array
+header("Location: index.php#contacto");
+exit;
 }
 
 // Calcular total
 $total = 0;
 foreach ($_SESSION['carrito'] as $item) {
-    $total += $item['precio'];
+$total += $item['precio'];
 }
 ?>
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -66,6 +99,7 @@ foreach ($_SESSION['carrito'] as $item) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <header>
         <div class="container nav-container">
@@ -75,6 +109,10 @@ foreach ($_SESSION['carrito'] as $item) {
             </div>
             <div class="menu-toggle">
                 <i class="fas fa-bars"></i>
+            </div>
+            <div class="language-switcher">
+                <a href="?lang=es" class="<?= $_SESSION['lang'] == 'es' ? 'active' : '' ?>">ES</a> |
+                <a href="?lang=en" class="<?= $_SESSION['lang'] == 'en' ? 'active' : '' ?>">EN</a>
             </div>
             <nav>
                 <ul class="nav-links">
@@ -88,36 +126,38 @@ foreach ($_SESSION['carrito'] as $item) {
                     <li class="cart-icon" id="cart-icon">
                         <i class="fas fa-shopping-cart"></i>
                         <span class="cart-count"><?php echo count($_SESSION['carrito']); ?></span>
-                        
+
                         <div class="cart-dropdown" id="cart-dropdown">
                             <h3>Mi Carrito</h3>
                             <?php if (empty($_SESSION['carrito'])): ?>
-                                <p class="empty-cart">Tu carrito está vacío</p>
+                            <p class="empty-cart">Tu carrito está vacío</p>
                             <?php else: ?>
-                                <?php foreach ($_SESSION['carrito'] as $key => $item): ?>
-                                <div class="cart-item">
-                                    <div>
-                                        <strong><?php echo $item['servicio']; ?></strong>
-                                    </div>
-                                    <div>
-                                        $<?php echo number_format($item['precio'], 2); ?>
-                                        <a href="?eliminar=<?php echo $key; ?>" class="delete-item"><i class="fas fa-trash"></i></a>
-                                    </div>
+                            <?php foreach ($_SESSION['carrito'] as $key => $item): ?>
+                            <div class="cart-item">
+                                <div>
+                                    <strong><?php echo $item['servicio']; ?></strong>
                                 </div>
-                                <?php endforeach; ?>
-                                <div class="cart-total">
-                                    <span>Total:</span>
-                                    <span>$<?php echo number_format($total, 2); ?></span>
+                                <div>
+                                    $<?php echo number_format($item['precio'], 2); ?>
+                                    <a href="?eliminar=<?php echo $key; ?>" class="delete-item"><i
+                                            class="fas fa-trash"></i></a>
                                 </div>
-                                <div style="text-align: center; margin-top: 15px;">
-                                    <a href="#contacto" class="add-to-cart">Completar Solicitud</a>
-                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                            <div class="cart-total">
+                                <span>Total:</span>
+                                <span>$<?php echo number_format($total, 2); ?></span>
+                            </div>
+                            <div style="text-align: center; margin-top: 15px;">
+                                <a href="#contacto" class="add-to-cart">Completar Solicitud</a>
+                            </div>
                             <?php endif; ?>
                             <?php if (!empty($_SESSION['carrito'])): ?>
                             <div style="text-align: center; margin-top: 10px;">
-                                <a href="?vaciar" class="clear-cart" style="color: red; text-decoration: underline;">Vaciar carrito</a>
+                                <a href="?vaciar" class="clear-cart"
+                                    style="color: red; text-decoration: underline;">Vaciar carrito</a>
                             </div>
-                        <?php endif; ?>
+                            <?php endif; ?>
                         </div>
                     </li>
                 </ul>
@@ -138,11 +178,11 @@ foreach ($_SESSION['carrito'] as $item) {
                     <img src="images/pic1.jpg" alt="Climatización 3">
                 </div>
             </div>
-            
+
             <!-- Botones de navegación -->
             <a class="prev" onclick="changeSlide(-1)">&#10094;</a>
             <a class="next" onclick="changeSlide(1)">&#10095;</a>
-            
+
             <!-- Indicadores de punto -->
             <div class="dots">
                 <span class="dot" onclick="currentSlide(1)"></span>
@@ -151,8 +191,8 @@ foreach ($_SESSION['carrito'] as $item) {
             </div>
 
             <div class="hero-content">
-                <h1>Expertos en Climatización<br>y Confort Térmico</h1>
-                <p>Soluciones profesionales de aire acondicionado, calefacción y ventilación para hogares y empresas. Más de 20 años de experiencia nos respaldan.</p>
+                <h1><?= __('Expertos en Climatización y Confort Térmico') ?></h1>
+                <p><?= __('Soluciones profesionales de aire acondicionado...') ?></p>
                 <a href="#contacto" class="cta-button">Solicitar Cotización</a>
             </div>
         </div>
@@ -168,7 +208,8 @@ foreach ($_SESSION['carrito'] as $item) {
                     </div>
                     <div class="service-content">
                         <h3>Reparación</h3>
-                        <p>Nuestros Técnicos están capacitados y certificados en el área de refrigeración y aire acondicionado así como en el manejo de refrigerantes.</p>
+                        <p>Nuestros Técnicos están capacitados y certificados en el área de refrigeración y aire
+                            acondicionado así como en el manejo de refrigerantes.</p>
                         <a href="?agregar=Reparacion" class="add-to-cart">Agregar</a>
                     </div>
                 </div>
@@ -178,7 +219,8 @@ foreach ($_SESSION['carrito'] as $item) {
                     </div>
                     <div class="service-content">
                         <h3>Instalación</h3>
-                        <p>Las instalaciones realizadas de forma profesional le garantizan un mejor rendimiento de su equipo de climatización.</p>
+                        <p>Las instalaciones realizadas de forma profesional le garantizan un mejor rendimiento de su
+                            equipo de climatización.</p>
                         <a href="?agregar=Instalacion" class="add-to-cart">Agregar</a>
                     </div>
                 </div>
@@ -188,7 +230,8 @@ foreach ($_SESSION['carrito'] as $item) {
                     </div>
                     <div class="service-content">
                         <h3>Mantenimiento</h3>
-                        <p>Un mantenimiento preventivo oportuno puede asegurarle larga vida a su equipo y un ahorro a su inversión</p>
+                        <p>Un mantenimiento preventivo oportuno puede asegurarle larga vida a su equipo y un ahorro a su
+                            inversión</p>
                         <a href="?agregar=Mantenimiento" class="add-to-cart">Agregar</a>
                     </div>
                 </div>
@@ -236,15 +279,18 @@ foreach ($_SESSION['carrito'] as $item) {
         <div class="container">
             <h2 class="section-title">Quiénes Somos</h2>
             <div class="about-content">
-                <p class="about-description">Somos una empresa líder en servicios de climatización con más de 20 años de experiencia, comprometidos con brindar soluciones de calidad y confort térmico a nuestros clientes.</p>
-                
+                <p class="about-description">Somos una empresa líder en servicios de climatización con más de 20 años de
+                    experiencia, comprometidos con brindar soluciones de calidad y confort térmico a nuestros clientes.
+                </p>
+
                 <div class="pillars-grid">
                     <div class="pillar-card">
                         <div class="pillar-icon">
                             <i class="fas fa-bullseye"></i>
                         </div>
                         <h3>Misión</h3>
-                        <p>Proporcionar soluciones integrales de climatización que mejoren la calidad de vida de nuestros clientes, garantizando eficiencia energética y satisfacción total.</p>
+                        <p>Proporcionar soluciones integrales de climatización que mejoren la calidad de vida de
+                            nuestros clientes, garantizando eficiencia energética y satisfacción total.</p>
                     </div>
 
                     <div class="pillar-card">
@@ -252,7 +298,8 @@ foreach ($_SESSION['carrito'] as $item) {
                             <i class="fas fa-eye"></i>
                         </div>
                         <h3>Visión</h3>
-                        <p>Ser la empresa líder en soluciones de climatización en la región, reconocida por nuestra excelencia, innovación y compromiso con el medio ambiente.</p>
+                        <p>Ser la empresa líder en soluciones de climatización en la región, reconocida por nuestra
+                            excelencia, innovación y compromiso con el medio ambiente.</p>
                     </div>
 
                     <div class="pillar-card">
@@ -313,7 +360,8 @@ foreach ($_SESSION['carrito'] as $item) {
                     <div class="testimonial-image">
                         <img src="img/clientefiel.jpg" alt="Cliente 1">
                     </div>
-                    <p class="testimonial-text">"Excelente servicio, muy profesionales y puntuales. Totalmente recomendados."</p>
+                    <p class="testimonial-text">"Excelente servicio, muy profesionales y puntuales. Totalmente
+                        recomendados."</p>
                     <h4>Juan Pérez</h4>
                     <p class="testimonial-role">Cliente Residencial</p>
                 </div>
@@ -379,28 +427,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 ?>
     <section class="contact scroll-animation" id="contacto">
-    <div class="container">
-        <h2 class="section-title">Contáctanos</h2>
-        
-        <?php if(isset($mensaje_exito)): ?>
+        <div class="container">
+            <h2 class="section-title">Contáctanos</h2>
+
+            <?php if(isset($mensaje_exito)): ?>
             <div class="success-message">
                 <?php echo $mensaje_exito; ?>
             </div>
-        <?php endif; ?>
-        
-        <div class="contact-grid">
-            <div class="contact-info">
-                <!-- Información de contacto - sin cambios -->
-                <div class="contact-item">
-                    <div class="contact-icon">
-                        <i class="fas fa-phone"></i>
+            <?php endif; ?>
+
+            <div class="contact-grid">
+                <div class="contact-info">
+                    <!-- Información de contacto - sin cambios -->
+                    <div class="contact-item">
+                        <div class="contact-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div>
+                            <h3>Teléfonos</h3>
+                            <p>878-763-5533</p>
+                            <p>878-795-2019</p>
+                        </div>
                     </div>
-                    <div>
-                        <h3>Teléfonos</h3>
-                        <p>878-763-5533</p>
-                        <p>878-795-2019</p>
-                    </div>
-                </div>
                     <div class="contact-item">
                         <div class="contact-icon">
                             <i class="fas fa-map-marker-alt"></i>
@@ -421,56 +469,61 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <p>Sábados: 9:00 AM - 1:00 PM</p>
                         </div>
                     </div>
-            </div>
-            
-            <!-- Formulario de contacto actualizado -->
-            <form class="contact-form" method="POST" action="index.php#contacto">
-                <div class="form-group">
-                    <input type="text" name="nombre" class="form-control" placeholder="Nombre completo" required>
                 </div>
-                <div class="form-group">
-                    <input type="email" name="email" class="form-control" placeholder="Correo electrónico" required>
-                </div>
-                <div class="form-group">
-                    <input type="tel" name="telefono" class="form-control" placeholder="Teléfono" required>
-                </div>
-                
-                <!-- Servicios seleccionados -->
-                <div class="selected-services">
-                    <h4>Servicios seleccionados:</h4>
-                    <?php if (empty($_SESSION['carrito'])): ?>
+
+                <!-- Formulario de contacto actualizado -->
+                <form class="contact-form" method="POST" action="index.php#contacto">
+                    <div class="form-group">
+                        <input type="text" name="nombre" class="form-control" placeholder="Nombre completo" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" name="email" class="form-control" placeholder="Correo electrónico" required>
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" name="telefono" class="form-control" placeholder="Teléfono" required>
+                    </div>
+
+                    <!-- Servicios seleccionados -->
+                    <div class="selected-services">
+                        <h4>Servicios seleccionados:</h4>
+                        <?php if (empty($_SESSION['carrito'])): ?>
                         <p>No has seleccionado ningún servicio</p>
-                    <?php else: ?>
+                        <?php else: ?>
                         <ul>
                             <?php foreach ($_SESSION['carrito'] as $key => $item): ?>
-                                <li>
-                                    <?php echo $item['servicio']; ?> - $<?php echo number_format($item['precio'], 2); ?>
-                                    <a href="?eliminar=<?php echo $key; ?>" class="delete-item"><i class="fas fa-times"></i></a>
-                                </li>
+                            <li>
+                                <?php echo $item['servicio']; ?> - $<?php echo number_format($item['precio'], 2); ?>
+                                <a href="?eliminar=<?php echo $key; ?>" class="delete-item"><i
+                                        class="fas fa-times"></i></a>
+                            </li>
                             <?php endforeach; ?>
                         </ul>
                         <p class="cart-total">Total: $<?php echo number_format($total, 2); ?></p>
-                    <?php endif; ?>
-                </div>
-                
-                <div class="form-group">
-                    <textarea name="mensaje" class="form-control" rows="5" placeholder="Mensaje" required></textarea>
-                </div>
-                <button type="submit" class="cta-button">Enviar Solicitud</button>
-            </form>
+                        <?php endif; ?>
+                    </div>
+
+                    <div class="form-group">
+                        <textarea name="mensaje" class="form-control" rows="5" placeholder="Mensaje"
+                            required></textarea>
+                    </div>
+                    <button type="submit" class="cta-button">Enviar Solicitud</button>
+                </form>
+            </div>
         </div>
-    </div>
-</section>
+    </section>
 
     <footer>
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-section">
                     <h3>Sobre Nosotros</h3>
-                    <p>Climas del Norte es tu aliado en soluciones de climatización. Expertos en instalación y mantenimiento de sistemas de aire acondicionado.</p>
+                    <p>Climas del Norte es tu aliado en soluciones de climatización. Expertos en instalación y
+                        mantenimiento de sistemas de aire acondicionado.</p>
                     <div class="social-links">
-                        <a href="https://m.facebook.com/profile.php?id=142211439205918"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://www.instagram.com/climas.del.norte/?hl=es-la"><i class="fab fa-instagram"></i></a>
+                        <a href="https://m.facebook.com/profile.php?id=142211439205918"><i
+                                class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/climas.del.norte/?hl=es-la"><i
+                                class="fab fa-instagram"></i></a>
                         <a href="https://wa.me/8787635533"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
@@ -510,34 +563,35 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     </div>
     <script src="script.js"></script>
     <script>
-        // Funcionalidad del carrito
-        document.addEventListener('DOMContentLoaded', function() {
-            const cartIcon = document.getElementById('cart-icon');
-            const cartDropdown = document.getElementById('cart-dropdown');
-            
-            // Mostrar/ocultar carrito al hacer clic
-            cartIcon.addEventListener('click', function(e) {
-                e.stopPropagation();
-                if (cartDropdown.style.display === 'block') {
-                    cartDropdown.style.display = 'none';
-                } else {
-                    cartDropdown.style.display = 'block';
-                }
-            });
-            
-            // Cerrar carrito al hacer clic fuera
-            document.addEventListener('click', function(e) {
-                if (!cartIcon.contains(e.target)) {
-                    cartDropdown.style.display = 'none';
-                }
-            });
-            
-            // Preseleccionar servicios en el formulario según carrito
-            const servicioSelect = document.getElementById('servicio-select');
-            if (servicioSelect) {
-                // Código PHP ya maneja la preselección con sus atributos "selected"
+    // Funcionalidad del carrito
+    document.addEventListener('DOMContentLoaded', function() {
+        const cartIcon = document.getElementById('cart-icon');
+        const cartDropdown = document.getElementById('cart-dropdown');
+
+        // Mostrar/ocultar carrito al hacer clic
+        cartIcon.addEventListener('click', function(e) {
+            e.stopPropagation();
+            if (cartDropdown.style.display === 'block') {
+                cartDropdown.style.display = 'none';
+            } else {
+                cartDropdown.style.display = 'block';
             }
         });
+
+        // Cerrar carrito al hacer clic fuera
+        document.addEventListener('click', function(e) {
+            if (!cartIcon.contains(e.target)) {
+                cartDropdown.style.display = 'none';
+            }
+        });
+
+        // Preseleccionar servicios en el formulario según carrito
+        const servicioSelect = document.getElementById('servicio-select');
+        if (servicioSelect) {
+            // Código PHP ya maneja la preselección con sus atributos "selected"
+        }
+    });
     </script>
 </body>
+
 </html>

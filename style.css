@@ -51,6 +51,24 @@ body {
     background: var(--primary-color);
 }
 
+.language-switcher {
+    display: inline-block;
+    margin-left: 20px;
+    font-size: 14px;
+}
+
+.language-switcher a {
+    color: #333;
+    text-decoration: none;
+    padding: 0 5px;
+}
+
+.language-switcher a.active {
+    font-weight: bold;
+    color: #007bff;
+    text-decoration: underline;
+}
+
 /* Animaciones */
 @keyframes slideInFromLeft {
     0% {
