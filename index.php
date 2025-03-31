@@ -109,7 +109,7 @@ $total += $item['precio'];
             </div>
             <div class="menu-toggle">
                 <i class="fas fa-bars"></i>
-            </div> 
+            </div>
             <div class="language-switcher">
                 <a href="?lang=es" class="<?= $_SESSION['lang'] == 'es' ? 'active' : '' ?>">ES</a> |
                 <a href="?lang=en" class="<?= $_SESSION['lang'] == 'en' ? 'active' : '' ?>">EN</a>
@@ -462,6 +462,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                     <div class="contact-item">
                         <div class="contact-icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
+                        <div>
+                            <h3><?= __('Ubicación') ?></h3>
+                            <div class="google-map">
+                                <iframe
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1237.571915066888!2d-100.56144852170576!3d28.678218303007753!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x865f8b0826f89e63%3A0xdae232dc26abc76a!2sClimas%20del%20Norte!5e0!3m2!1ses!2smx!4v1743301110858!5m2!1ses!2smx"
+                                    width="400" height="300" style="border:0;" allowfullscreen="" loading="lazy"
+                                    referrerpolicy="no-referrer-when-downgrade"></iframe>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="contact-item">
+                        <div class="contact-icon">
                             <i class="fas fa-clock"></i>
                         </div>
                         <div>
@@ -472,18 +486,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                 </div>
 
-                <form class="contact-form" method="POST" action="index.php#contacto">
+                <form class="contact-form" method="POST" action="index.php#contacto"
+                    onsubmit="return validarFormulario()">
                     <div class="form-group">
                         <input type="text" name="nombre" class="form-control" placeholder="<?= __('Nombre completo') ?>"
-                            required>
+                            required minlength="3" maxlength="50" pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+"
+                            title="<?= __('Solo letras y espacios') ?>">
+                        <small class="error-message" id="nombre-error"></small>
                     </div>
                     <div class="form-group">
                         <input type="email" name="email" class="form-control"
-                            placeholder="<?= __('Correo electrónico') ?>" required>
+                            placeholder="<?= __('Correo electrónico') ?>" required
+                            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
+                        <small class="error-message" id="email-error"></small>
                     </div>
                     <div class="form-group">
                         <input type="tel" name="telefono" class="form-control" placeholder="<?= __('Teléfono') ?>"
-                            required>
+                            required pattern="[0-9]{10}" title="<?= __('10 dígitos sin espacios') ?>">
+                        <small class="error-message" id="telefono-error"></small>
                     </div>
 
                     <!-- Servicios seleccionados -->

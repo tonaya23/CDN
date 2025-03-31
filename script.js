@@ -131,3 +131,36 @@ function showSlides(n) {
     slides[slideIndex-1].style.display = "block";  
     dots[slideIndex-1].className += " active";
 }
+
+function validarFormulario() {
+    let valido = true;
+    
+    // Validar nombre
+    const nombre = document.querySelector('input[name="nombre"]');
+    if (!nombre.checkValidity()) {
+        document.getElementById('nombre-error').textContent = 'Nombre inválido (solo letras, 3-50 caracteres)';
+        valido = false;
+    } else {
+        document.getElementById('nombre-error').textContent = '';
+    }
+    
+    // Validar email
+    const email = document.querySelector('input[name="email"]');
+    if (!email.checkValidity()) {
+        document.getElementById('email-error').textContent = 'Correo electrónico inválido';
+        valido = false;
+    } else {
+        document.getElementById('email-error').textContent = '';
+    }
+    
+    // Validar teléfono
+    const telefono = document.querySelector('input[name="telefono"]');
+    if (!telefono.checkValidity()) {
+        document.getElementById('telefono-error').textContent = 'Teléfono inválido (10 dígitos)';
+        valido = false;
+    } else {
+        document.getElementById('telefono-error').textContent = '';
+    }
+    
+    return valido;
+}
