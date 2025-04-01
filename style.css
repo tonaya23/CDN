@@ -166,9 +166,6 @@ header.scrolled {
     position: relative;
 }
 
-.hero-content {
-    animation: fadeIn 2s ease-out;
-}
 
 .hero h1 {
     font-size: 3.5rem;
@@ -777,6 +774,7 @@ footer {
 
 /* Ajuste del contenido del héroe */
 .hero-content {
+    animation: fadeIn 2s ease-out;
     position: absolute;
     top: 50%;
     left: 50%;

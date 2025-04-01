@@ -2,5 +2,5 @@ projectKey=CASO3
 serverUrl=http://localhost:9000
 serverVersion=25.3.0.104237
 dashboardUrl=http://localhost:9000/dashboard?id=CASO3
-ceTaskId=cb5cc26a-b755-440c-a9b1-b8eb74f3c169
-ceTaskUrl=http://localhost:9000/api/ce/task?id=cb5cc26a-b755-440c-a9b1-b8eb74f3c169
+ceTaskId=22276ac8-5660-46da-83f2-3264bc504d7d
+ceTaskUrl=http://localhost:9000/api/ce/task?id=22276ac8-5660-46da-83f2-3264bc504d7d
