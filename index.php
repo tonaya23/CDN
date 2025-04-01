@@ -13,14 +13,16 @@ if (isset($_GET['lang']) && in_array($_GET['lang'], ['es', 'en'])) {
 }
 
 // Carga el autoload de Composer
-require 'vendor/autoload.php';
+require_once 'vendor/autoload.php';
 
 // Función de traducción automática
 function __($text) {
     static $translator = null;
     
-    if ($_SESSION['lang'] == 'es') return $text; // No traducir si ya está en español
-    
+    if ($_SESSION['lang'] == 'es') {
+        return $text;
+    }
+        
     if ($translator === null) {
         $translator = new Stichoza\GoogleTranslate\GoogleTranslate();
         $translator->setSource('es');
@@ -36,7 +38,7 @@ function __($text) {
 
 // Inicializar el carrito si no existe
 if (!isset($_SESSION['carrito'])) {
-$_SESSION['carrito'] = [];
+    $_SESSION['carrito'] = [];
 }
 
 // Vaciar el carrito completamente
@@ -86,7 +88,7 @@ exit;
 // Calcular total
 $total = 0;
 foreach ($_SESSION['carrito'] as $item) {
-$total += $item['precio'];
+    $total += $item['precio'];
 }
 ?>
 <!DOCTYPE html>
@@ -311,7 +313,6 @@ $total += $item['precio'];
                             <li><?= __('Compromiso') ?></li>
                             <li><?= __('Innovación') ?></li>
                             <li><?= __('Responsabilidad') ?></li>
-                        </ul>
                         </ul>
                     </div>
                 </div>
