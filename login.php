@@ -37,49 +37,78 @@ $error = '';
 $email = '';
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    $conn = new mysqli("localhost", "root", "", "cdn_servicios");
-    if ($conn->connect_error) die("Error de conexión: " . $conn->connect_error);
+    // Validar reCAPTCHA
+    $secretKey = "6Ld-WAcrAAAAABEf1T0eVx_cfsAG6xNNfksSuiYa"; // Reemplaza con tu Secret Key
+    $recaptchaResponse = $_POST['g-recaptcha-response'];
+    $remoteIp = $_SERVER['REMOTE_ADDR'];
 
-    $email = $_POST['email'];
-    $password = $_POST['password'];
+    $url = "https://www.google.com/recaptcha/api/siteverify";
+    $data = [
+        'secret' => $secretKey,
+        'response' => $recaptchaResponse,
+        'remoteip' => $remoteIp
+    ];
+    $options = [
+        'http' => [
+            'header' => "Content-type: application/x-www-form-urlencoded\r\n",
+            'method' => 'POST',
+            'content' => http_build_query($data)
+        ]
+    ];
+    $context = stream_context_create($options);
+    $result = file_get_contents($url, false, $context);
+    $response = json_decode($result, true);
 
-    if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
-        $error = translate('El formato del correo electrónico no es válido');
+    if ($response['success'] !== true) {
+        $error = translate('Por favor, verifica que no eres un robot');
     } else {
-        $stmt = $conn->prepare("SELECT id, nombre, password FROM usuarios WHERE email = ?");
-        $stmt->bind_param("s", $email);
-        $stmt->execute();
-        $result = $stmt->get_result();
+        $conn = new mysqli("localhost", "root", "", "cdn_servicios");
+        if ($conn->connect_error) die("Error de conexión: " . $conn->connect_error);
 
-        if ($result->num_rows === 1) {
-            $usuario = $result->fetch_assoc();
-            if (password_verify($password, $usuario['password'])) {
-                $_SESSION['usuario_id'] = $usuario['id'];
-                $_SESSION['usuario_nombre'] = $usuario['nombre'];
-                $redirect = isset($_SESSION['redirect_after_login']) ? $_SESSION['redirect_after_login'] : 'index.php';
-                unset($_SESSION['redirect_after_login']);
-                header("Location: $redirect");
-                exit;
+        $email = $_POST['email'];
+        $password = $_POST['password'];
+
+        if (!filter_var($email, FILTER_VALIDATE_EMAIL)) {
+            $error = translate('El formato del correo electrónico no es válido');
+        } else {
+            $stmt = $conn->prepare("SELECT id, nombre, password FROM usuarios WHERE email = ?");
+            $stmt->bind_param("s", $email);
+            $stmt->execute();
+            $result = $stmt->get_result();
+
+            if ($result->num_rows === 1) {
+                $usuario = $result->fetch_assoc();
+                if (password_verify($password, $usuario['password'])) {
+                    $_SESSION['usuario_id'] = $usuario['id'];
+                    $_SESSION['usuario_nombre'] = $usuario['nombre'];
+                    $redirect = isset($_SESSION['redirect_after_login']) ? $_SESSION['redirect_after_login'] : 'index.php';
+                    unset($_SESSION['redirect_after_login']);
+                    header("Location: $redirect");
+                    exit;
+                } else {
+                    $error = translate('Email o contraseña incorrectos');
+                }
             } else {
                 $error = translate('Email o contraseña incorrectos');
             }
-        } else {
-            $error = translate('Email o contraseña incorrectos');
+            $stmt->close();
         }
-        $stmt->close();
+        $conn->close();
     }
-    $conn->close();
 }
 ?>
 <!DOCTYPE html>
 <html lang="<?= $_SESSION['lang'] ?>">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title><?= translate('Iniciar Sesión - Climas del Norte') ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <script src="https://www.google.com/recaptcha/api.js" async defer></script>
 </head>
+
 <body>
     <header>
         <div class="container nav-container">
@@ -98,19 +127,23 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     <div class="auth-container">
         <h2><?= translate('Iniciar Sesión') ?></h2>
         <?php if ($error): ?>
-            <div class="error-message"><?= $error ?></div>
+        <div class="error-message"><?= $error ?></div>
         <?php endif; ?>
         <form method="POST" action="<?= htmlspecialchars($_SERVER["PHP_SELF"]); ?>">
             <div class="form-group">
-                <input type="email" name="email" class="form-control" placeholder="<?= translate('Correo electrónico') ?>" 
-                       value="<?= htmlspecialchars($email) ?>" required>
+                <input type="email" name="email" class="form-control"
+                    placeholder="<?= translate('Correo electrónico') ?>" value="<?= htmlspecialchars($email) ?>"
+                    required>
             </div>
             <div class="form-group">
                 <div class="password-container">
-                    <input type="password" name="password" id="password" class="form-control" 
-                           placeholder="<?= translate('Contraseña') ?>" required>
+                    <input type="password" name="password" id="password" class="form-control"
+                        placeholder="<?= translate('Contraseña') ?>" required>
                     <i class="toggle-password fas fa-eye" onclick="togglePassword('password', this)"></i>
                 </div>
+            </div>
+            <div class="form-group">
+                <div class="g-recaptcha" data-sitekey="6Ld-WAcrAAAAAEPyetILsZeyMT3OovHUyYoMbdOR"></div> <!-- Reemplaza con tu Site Key -->
             </div>
             <button type="submit" class="auth-btn"><?= translate('Iniciar Sesión') ?></button>
             <a href="register.php" class="auth-link"><?= translate('¿No tienes cuenta? Regístrate aquí') ?></a>
@@ -131,4 +164,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
     </script>
 </body>
+
 </html>

@@ -982,6 +982,12 @@ body {
     display: block;
 }
 
+.g-recaptcha {
+    margin: 1rem 0;
+    display: flex;
+    justify-content: center;
+}
+
 .success-message {
     color: #2ecc71;
     font-size: 1rem;
