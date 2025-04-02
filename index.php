@@ -120,7 +120,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $_SESSION['lang']; ?>">
-
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -128,7 +127,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
-
 <body>
     <header>
         <div class="container nav-container">
@@ -138,6 +136,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
             </div>
             <div class="menu-toggle">
                 <i class="fas fa-bars"></i>
+            </div>
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="<?= translate('Buscar en la página...') ?>" onkeyup="searchPage()">
+                <i class="fas fa-search"></i>
             </div>
             <div class="language-switcher">
                 <a href="?lang=es" class="<?= $_SESSION['lang'] == 'es' ? 'active' : '' ?>">ES</a> |
@@ -200,6 +202,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
         </div>
     </header>
 
+    <!-- Resto del HTML sin cambios -->
     <section class="hero" id="inicio">
         <div class="slider-container">
             <div class="slider">
@@ -230,8 +233,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
                     <div class="service-image"><img src="img/reparacion.jpg" alt="Reparación"></div>
                     <div class="service-content">
                         <h3><?= translate('Reparación') ?></h3>
-                        <p><?= translate('Nuestros Técnicos están capacitados y certificados en el área de refrigeración y aire acondicionado...') ?>
-                        </p>
+                        <p><?= translate('Nuestros Técnicos están capacitados y certificados en el área de refrigeración y aire acondicionado...') ?></p>
                         <a href="?agregar=Reparacion" class="add-to-cart"><?= translate('Agregar') ?></a>
                     </div>
                 </div>
@@ -239,8 +241,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
                     <div class="service-image"><img src="img/instalacion.jpg" alt="Instalación"></div>
                     <div class="service-content">
                         <h3><?= translate('Instalación') ?></h3>
-                        <p><?= translate('Las instalaciones realizadas de forma profesional le garantizan un mejor rendimiento...') ?>
-                        </p>
+                        <p><?= translate('Las instalaciones realizadas de forma profesional le garantizan un mejor rendimiento...') ?></p>
                         <a href="?agregar=Instalacion" class="add-to-cart"><?= translate('Agregar') ?></a>
                     </div>
                 </div>
@@ -248,8 +249,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
                     <div class="service-image"><img src="img/mantenimiento.jpg" alt="Mantenimiento"></div>
                     <div class="service-content">
                         <h3><?= translate('Mantenimiento') ?></h3>
-                        <p><?= translate('Un mantenimiento preventivo oportuno puede asegurarle larga vida a su equipo...') ?>
-                        </p>
+                        <p><?= translate('Un mantenimiento preventivo oportuno puede asegurarle larga vida a su equipo...') ?></p>
                         <a href="?agregar=Mantenimiento" class="add-to-cart"><?= translate('Agregar') ?></a>
                     </div>
                 </div>
@@ -296,8 +296,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
                     <div class="pillar-card">
                         <div class="pillar-icon"><i class="fas fa-bullseye"></i></div>
                         <h3><?= translate('Misión') ?></h3>
-                        <p><?= translate('Proporcionar soluciones integrales de climatización que mejoren la calidad de vida...') ?>
-                        </p>
+                        <p><?= translate('Proporcionar soluciones integrales de climatización que mejoren la calidad de vida...') ?></p>
                     </div>
                     <div class="pillar-card">
                         <div class="pillar-icon"><i class="fas fa-eye"></i></div>
@@ -366,8 +365,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
             <div class="error-message"><?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
             <div class="contact-grid">
-            <div class="contact-info">
-                    <!-- Información de contacto - sin cambios -->
+                <div class="contact-info">
                     <div class="contact-item">
                         <div class="contact-icon">
                             <i class="fas fa-phone"></i>
@@ -384,8 +382,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
                         </div>
                         <div>
                             <h3><?= translate('Dirección') ?></h3>
-                            <p><?= translate('Venustiano Carranza No. 909 Col. Villa de Fuente. Piedras Negras Coah. MX') ?>
-                            </p>
+                            <p><?= translate('Venustiano Carranza No. 909 Col. Villa de Fuente. Piedras Negras Coah. MX') ?></p>
                             <p><?= translate('Sucursal: Lib. Armando Treviño 704 Col. Guillén. Piedras Negras Coah. MX') ?></p>
                         </div>
                     </div>
@@ -415,25 +412,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
                     </div>
                 </div>
                 <?php if (isset($_SESSION['usuario_id'])): ?>
-                <form class="contact-form" method="POST" action="index.php#contacto"
-                    onsubmit="return validarFormulario()">
+                <form class="contact-form" method="POST" action="index.php#contacto" onsubmit="return validarFormulario()">
                     <div class="form-group">
-                        <input type="text" name="nombre" class="form-control"
-                            placeholder="<?= translate('Nombre completo') ?>" required minlength="5" maxlength="50"
-                            pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+"
-                            title="<?= translate('Solo letras y espacios, mínimo 5 caracteres') ?>">
+                        <input type="text" name="nombre" class="form-control" placeholder="<?= translate('Nombre completo') ?>" required minlength="5" maxlength="50" pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+" title="<?= translate('Solo letras y espacios, mínimo 5 caracteres') ?>">
                         <small class="error-message" id="nombre-error"></small>
                     </div>
                     <div class="form-group">
-                        <input type="email" name="email" class="form-control"
-                            placeholder="<?= translate('Correo electrónico') ?>" required
-                            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
+                        <input type="email" name="email" class="form-control" placeholder="<?= translate('Correo electrónico') ?>" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
                         <small class="error-message" id="email-error"></small>
                     </div>
                     <div class="form-group">
-                        <input type="tel" name="telefono" class="form-control"
-                            placeholder="<?= translate('Teléfono') ?>" required pattern="[0-9]{10}"
-                            title="<?= translate('10 dígitos sin espacios') ?>">
+                        <input type="tel" name="telefono" class="form-control" placeholder="<?= translate('Teléfono') ?>" required pattern="[0-9]{10}" title="<?= translate('10 dígitos sin espacios') ?>">
                         <small class="error-message" id="telefono-error"></small>
                     </div>
                     <div class="selected-services">
@@ -453,8 +442,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
                         <?php endif; ?>
                     </div>
                     <div class="form-group">
-                        <textarea name="mensaje" class="form-control" rows="5" placeholder="<?= translate('Mensaje') ?>"
-                            required></textarea>
+                        <textarea name="mensaje" class="form-control" rows="5" placeholder="<?= translate('Mensaje') ?>" required></textarea>
                     </div>
                     <button type="submit" class="cta-button"><?= translate('Enviar Solicitud') ?></button>
                 </form>
@@ -463,8 +451,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
                     <div class="login-message">
                         <i class="fas fa-lock"></i>
                         <h3><?= translate('Inicia sesión para completar tu solicitud') ?></h3>
-                        <p><?= translate('Para poder enviar una solicitud de servicio, debes iniciar sesión o crear una cuenta.') ?>
-                        </p>
+                        <p><?= translate('Para poder enviar una solicitud de servicio, debes iniciar sesión o crear una cuenta.') ?></p>
                         <div class="login-buttons">
                             <a href="login.php" class="cta-button"><?= translate('Iniciar Sesión') ?></a>
                             <a href="register.php" class="secondary-button"><?= translate('Crear Cuenta') ?></a>
@@ -483,10 +470,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
                     <h3><?= translate('Sobre Nosotros') ?></h3>
                     <p><?= translate('Climas del Norte es tu aliado en soluciones de climatización...') ?></p>
                     <div class="social-links">
-                        <a href="https://m.facebook.com/profile.php?id=142211439205918"><i
-                                class="fab fa-facebook-f"></i></a>
-                        <a href="https://www.instagram.com/climas.del.norte/?hl=es-la"><i
-                                class="fab fa-instagram"></i></a>
+                        <a href="https://m.facebook.com/profile.php?id=142211439205918"><i class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/climas.del.norte/?hl=es-la"><i class="fab fa-instagram"></i></a>
                         <a href="https://wa.me/8787635533"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
@@ -575,7 +560,24 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
             }
         });
     });
+
+    function searchPage() {
+        const input = document.getElementById('searchInput').value.toLowerCase();
+        const sections = document.querySelectorAll('section');
+        
+        sections.forEach(section => {
+            const textContent = section.textContent.toLowerCase();
+            if (textContent.includes(input) || input === '') {
+                section.style.display = 'block';
+            } else {
+                section.style.display = 'none';
+            }
+        });
+
+        // Asegurar que el header y footer siempre estén visibles
+        document.querySelector('header').style.display = 'block';
+        document.querySelector('footer').style.display = 'block';
+    }
     </script>
 </body>
-
 </html>

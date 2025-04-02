@@ -998,6 +998,44 @@ body {
     text-align: center;
 }
 
+.search-bar {
+    position: relative;
+    display: flex;
+    align-items: center;
+    margin-right: 20px;
+}
+
+.search-bar input {
+    padding: 8px 30px 8px 10px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    font-size: 14px;
+    width: 200px;
+    transition: width 0.3s ease;
+}
+
+.search-bar input:focus {
+    width: 250px;
+    outline: none;
+    border-color: #007bff;
+}
+
+.search-bar .fa-search {
+    position: absolute;
+    right: 10px;
+    color: #666;
+    font-size: 14px;
+}
+
+@media (max-width: 768px) {
+    .search-bar input {
+        width: 150px;
+    }
+    .search-bar input:focus {
+        width: 180px;
+    }
+}
+
 /* Botón de acción */
 .auth-btn {
     width: 100%;
