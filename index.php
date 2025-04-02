@@ -16,13 +16,13 @@ if (isset($_GET['lang']) && in_array($_GET['lang'], ['es', 'en'])) {
 require_once 'vendor/autoload.php';
 
 // Función de traducción automática
-function __($text) {
+function translate($text) {
     static $translator = null;
     
     if ($_SESSION['lang'] == 'es') {
-        return $text;
+        return $text; // No traducir si ya está en español
     }
-        
+    
     if ($translator === null) {
         $translator = new Stichoza\GoogleTranslate\GoogleTranslate();
         $translator->setSource('es');
@@ -97,7 +97,7 @@ foreach ($_SESSION['carrito'] as $item) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= __('Climas del Norte - Servicios Profesionales de Climatización') ?></title>
+    <title><?= translate('Climas del Norte - Servicios Profesionales de Climatización') ?></title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
@@ -118,21 +118,21 @@ foreach ($_SESSION['carrito'] as $item) {
             </div>
             <nav>
                 <ul class="nav-links">
-                    <li><a href="#inicio"><?= __('Inicio') ?></a></li>
-                    <li><a href="#servicios"><?= __('Servicios') ?></a></li>
-                    <li><a href="#nosotros"><?= __('¿Por qué Elegirnos?') ?></a></li>
-                    <li><a href="#quienes_somos"><?= __('Quienes Somos') ?></a></li>
-                    <li><a href="#galeria"><?= __('Galería') ?></a></li>
-                    <li><a href="#testimonios"><?= __('Testimonios') ?></a></li>
-                    <li><a href="#contacto"><?= __('Contacto') ?></a></li>
+                    <li><a href="#inicio"><?= translate('Inicio') ?></a></li>
+                    <li><a href="#servicios"><?= translate('Servicios') ?></a></li>
+                    <li><a href="#nosotros"><?= translate('¿Por qué Elegirnos?') ?></a></li>
+                    <li><a href="#quienes_somos"><?= translate('Quienes Somos') ?></a></li>
+                    <li><a href="#galeria"><?= translate('Galería') ?></a></li>
+                    <li><a href="#testimonios"><?= translate('Testimonios') ?></a></li>
+                    <li><a href="#contacto"><?= translate('Contacto') ?></a></li>
                     <li class="cart-icon" id="cart-icon">
                         <i class="fas fa-shopping-cart"></i>
                         <span class="cart-count"><?php echo count($_SESSION['carrito']); ?></span>
 
                         <div class="cart-dropdown" id="cart-dropdown">
-                            <h3><?= __('Mi Carrito') ?></h3>
+                            <h3><?= translate('Mi Carrito') ?></h3>
                             <?php if (empty($_SESSION['carrito'])): ?>
-                            <p class="empty-cart"><?= __('Tu carrito está vacío') ?></p>
+                            <p class="empty-cart"><?= translate('Tu carrito está vacío') ?></p>
                             <?php else: ?>
                             <?php foreach ($_SESSION['carrito'] as $key => $item): ?>
                             <div class="cart-item">
@@ -151,12 +151,12 @@ foreach ($_SESSION['carrito'] as $item) {
                                 <span>$<?php echo number_format($total, 2); ?></span>
                             </div>
                             <div style="text-align: center; margin-top: 15px;">
-                                <a href="#contacto" class="add-to-cart"><?= __('Completar Solicitud') ?></a>
+                                <a href="#contacto" class="add-to-cart"><?= translate('Completar Solicitud') ?></a>
                             </div>
                             <?php endif; ?>
                             <?php if (!empty($_SESSION['carrito'])): ?>
                             <div style="text-align: center; margin-top: 10px;">
-                                <a href="?vaciar" class="clear-cart"><?= __('Vaciar carrito') ?></a>
+                                <a href="?vaciar" class="clear-cart"><?= translate('Vaciar carrito') ?></a>
 
                             </div>
                             <?php endif; ?>
@@ -193,26 +193,26 @@ foreach ($_SESSION['carrito'] as $item) {
             </div>
 
             <div class="hero-content">
-                <h1><?= __('Expertos en Climatización y Confort Térmico') ?></h1>
-                <p><?= __('Soluciones profesionales de aire acondicionado...') ?></p>
-                <a href="#contacto" class="cta-button"><?= __('Solicitar Cotización') ?></a>
+                <h1><?= translate('Expertos en Climatización y Confort Térmico') ?></h1>
+                <p><?= translate('Soluciones profesionales de aire acondicionado...') ?></p>
+                <a href="#contacto" class="cta-button"><?= translate('Solicitar Cotización') ?></a>
             </div>
         </div>
     </section>
 
     <section class="services scroll-animation" id="servicios">
         <div class="container">
-            <h2 class="section-title"><?= __('Nuestros Servicios') ?></h2>
+            <h2 class="section-title"><?= translate('Nuestros Servicios') ?></h2>
             <div class="services-grid">
                 <div class="service-card">
                     <div class="service-image">
                         <img src="img/reparacion.jpg" alt="Aire Acondicionado">
                     </div>
                     <div class="service-content">
-                        <h3><?= __('Reparación') ?></h3>
-                        <p><?= __('Nuestros Técnicos están capacitados y certificados en el área de refrigeración y aire
+                        <h3><?= translate('Reparación') ?></h3>
+                        <p><?= translate('Nuestros Técnicos están capacitados y certificados en el área de refrigeración y aire
                             acondicionado así como en el manejo de refrigerantes.') ?></p>
-                        <a href="?agregar=Reparacion" class="add-to-cart"><?= __('Agregar') ?></a>
+                        <a href="?agregar=Reparacion" class="add-to-cart"><?= translate('Agregar') ?></a>
                     </div>
                 </div>
                 <div class="service-card">
@@ -220,10 +220,10 @@ foreach ($_SESSION['carrito'] as $item) {
                         <img src="img/instalacion.jpg" alt="instalacion">
                     </div>
                     <div class="service-content">
-                        <h3><?= __('Instalación') ?></h3>
-                        <p><?= __('Las instalaciones realizadas de forma profesional le garantizan un mejor rendimiento de su
+                        <h3><?= translate('Instalación') ?></h3>
+                        <p><?= translate('Las instalaciones realizadas de forma profesional le garantizan un mejor rendimiento de su
                             equipo de climatización.') ?></p>
-                        <a href="?agregar=Instalacion" class="add-to-cart"><?= __('Agregar') ?></a>
+                        <a href="?agregar=Instalacion" class="add-to-cart"><?= translate('Agregar') ?></a>
                     </div>
                 </div>
                 <div class="service-card">
@@ -231,10 +231,10 @@ foreach ($_SESSION['carrito'] as $item) {
                         <img src="img/mantenimiento.jpg" alt="Mantenimiento">
                     </div>
                     <div class="service-content">
-                        <h3><?= __('Mantenimiento') ?></h3>
-                        <p><?= __('Un mantenimiento preventivo oportuno puede asegurarle larga vida a su equipo y un ahorro a su
+                        <h3><?= translate('Mantenimiento') ?></h3>
+                        <p><?= translate('Un mantenimiento preventivo oportuno puede asegurarle larga vida a su equipo y un ahorro a su
                             inversión') ?></p>
-                        <a href="?agregar=Mantenimiento" class="add-to-cart"><?= __('Agregar') ?></a>
+                        <a href="?agregar=Mantenimiento" class="add-to-cart"><?= translate('Agregar') ?></a>
                     </div>
                 </div>
             </div>
@@ -243,35 +243,35 @@ foreach ($_SESSION['carrito'] as $item) {
 
     <section class="why-us scroll-animation" id="nosotros">
         <div class="container">
-            <h2 class="section-title"><?= __('¿Por Qué Elegirnos?') ?></h2>
+            <h2 class="section-title"><?= translate('¿Por Qué Elegirnos?') ?></h2>
             <div class="features-grid">
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-check-circle"></i>
                     </div>
-                    <h3><?= __('Experiencia') ?></h3>
-                    <p><?= __('Más de 20 años brindando servicios de calidad en la región.') ?></p>
+                    <h3><?= translate('Experiencia') ?></h3>
+                    <p><?= translate('Más de 20 años brindando servicios de calidad en la región.') ?></p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-tools"></i>
                     </div>
-                    <h3><?= __('Profesionalismo') ?></h3>
-                    <p><?= __('Personal altamente capacitado y certificado.') ?></p>
+                    <h3><?= translate('Profesionalismo') ?></h3>
+                    <p><?= translate('Personal altamente capacitado y certificado.') ?></p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-clock"></i>
                     </div>
-                    <h3><?= __('Puntualidad') ?></h3>
-                    <p><?= __('Respetamos tu tiempo y cumplimos con los plazos establecidos.') ?></p>
+                    <h3><?= translate('Puntualidad') ?></h3>
+                    <p><?= translate('Respetamos tu tiempo y cumplimos con los plazos establecidos.') ?></p>
                 </div>
                 <div class="feature-card">
                     <div class="feature-icon">
                         <i class="fas fa-star"></i>
                     </div>
-                    <h3><?= __('Garantía') ?></h3>
-                    <p><?= __('Todos nuestros servicios cuentan con garantía por escrito.') ?></p>
+                    <h3><?= translate('Garantía') ?></h3>
+                    <p><?= translate('Todos nuestros servicios cuentan con garantía por escrito.') ?></p>
                 </div>
             </div>
         </div>
@@ -279,26 +279,26 @@ foreach ($_SESSION['carrito'] as $item) {
 
     <section class="about-us scroll-animation" id="quienes_somos">
         <div class="container">
-            <h2 class="section-title"><?= __('Quiénes Somos') ?></h2>
+            <h2 class="section-title"><?= translate('Quiénes Somos') ?></h2>
             <div class="about-content">
                 <p class="about-description">
-                    <?= __('Somos una empresa líder en servicios de climatización con más de 20 años de experiencia, comprometidos con brindar soluciones de calidad y confort térmico a nuestros clientes.') ?>
+                    <?= translate('Somos una empresa líder en servicios de climatización con más de 20 años de experiencia, comprometidos con brindar soluciones de calidad y confort térmico a nuestros clientes.') ?>
                 </p>
                 <div class="pillars-grid">
                     <div class="pillar-card">
                         <div class="pillar-icon">
                             <i class="fas fa-bullseye"></i>
                         </div>
-                        <h3><?= __('Misión') ?></h3>
-                        <p><?= __('Proporcionar soluciones integrales de climatización que mejoren la calidad de vida de nuestros clientes, garantizando eficiencia energética y satisfacción total.') ?>
+                        <h3><?= translate('Misión') ?></h3>
+                        <p><?= translate('Proporcionar soluciones integrales de climatización que mejoren la calidad de vida de nuestros clientes, garantizando eficiencia energética y satisfacción total.') ?>
                         </p>
                     </div>
                     <div class="pillar-card">
                         <div class="pillar-icon">
                             <i class="fas fa-eye"></i>
                         </div>
-                        <h3><?= __('Visión') ?></h3>
-                        <p><?= __('Ser la empresa líder en soluciones de climatización en la región, reconocida por nuestra excelencia, innovación y compromiso con el medio ambiente.') ?>
+                        <h3><?= translate('Visión') ?></h3>
+                        <p><?= translate('Ser la empresa líder en soluciones de climatización en la región, reconocida por nuestra excelencia, innovación y compromiso con el medio ambiente.') ?>
                         </p>
                     </div>
 
@@ -306,13 +306,13 @@ foreach ($_SESSION['carrito'] as $item) {
                         <div class="pillar-icon">
                             <i class="fas fa-star"></i>
                         </div>
-                        <h3><?= __('Valores') ?></h3>
+                        <h3><?= translate('Valores') ?></h3>
                         <ul class="values-list">
-                            <li><?= __('Honestidad') ?></li>
-                            <li><?= __('Excelencia') ?></li>
-                            <li><?= __('Compromiso') ?></li>
-                            <li><?= __('Innovación') ?></li>
-                            <li><?= __('Responsabilidad') ?></li>
+                            <li><?= translate('Honestidad') ?></li>
+                            <li><?= translate('Excelencia') ?></li>
+                            <li><?= translate('Compromiso') ?></li>
+                            <li><?= translate('Innovación') ?></li>
+                            <li><?= translate('Responsabilidad') ?></li>
                         </ul>
                     </div>
                 </div>
@@ -322,7 +322,7 @@ foreach ($_SESSION['carrito'] as $item) {
 
     <section class="gallery scroll-animation" id="galeria">
         <div class="container">
-            <h2 class="section-title"><?= __('Galería de Proyectos') ?></h2>
+            <h2 class="section-title"><?= translate('Galería de Proyectos') ?></h2>
             <div class="gallery-grid">
                 <div class="gallery-item">
                     <img src="img/pic4.jpg" alt="Proyecto 1">
@@ -354,16 +354,16 @@ foreach ($_SESSION['carrito'] as $item) {
 
     <section class="testimonials scroll-animation" id="testimonios">
         <div class="container">
-            <h2 class="section-title"><?= __('Lo Que Dicen Nuestros Clientes') ?></h2>
+            <h2 class="section-title"><?= translate('Lo Que Dicen Nuestros Clientes') ?></h2>
             <div class="testimonial-slider">
                 <div class="testimonial-card">
                     <div class="testimonial-image">
                         <img src="img/clientefiel.jpg" alt="Cliente 1">
                     </div>
                     <p class="testimonial-text">
-                        <?= __('"Excelente servicio, muy profesionales y puntuales. Totalmente recomendados."') ?></p>
+                        <?= translate('"Excelente servicio, muy profesionales y puntuales. Totalmente recomendados."') ?></p>
                     <h4>Juan Pérez</h4>
-                    <p class="testimonial-role"><?= __('Cliente Residencial') ?></p>
+                    <p class="testimonial-role"><?= translate('Cliente Residencial') ?></p>
                 </div>
             </div>
         </div>
@@ -429,7 +429,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 ?>
     <section class="contact scroll-animation" id="contacto">
         <div class="container">
-            <h2 class="section-title"><?= __('Contáctanos') ?></h2>
+            <h2 class="section-title"><?= translate('Contáctanos') ?></h2>
             =
             <?php if(isset($mensaje_exito)): ?>
             <div class="success-message">
@@ -445,7 +445,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <i class="fas fa-phone"></i>
                         </div>
                         <div>
-                            <h3><?= __('Teléfonos') ?></h3>
+                            <h3><?= translate('Teléfonos') ?></h3>
                             <p>878-763-5533</p>
                             <p>878-795-2019</p>
                         </div>
@@ -455,10 +455,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <i class="fas fa-map-marker-alt"></i>
                         </div>
                         <div>
-                            <h3><?= __('Dirección') ?></h3>
-                            <p><?= __('Venustiano Carranza No. 909 Col. Villa de Fuente. Piedras Negras Coah. MX') ?>
+                            <h3><?= translate('Dirección') ?></h3>
+                            <p><?= translate('Venustiano Carranza No. 909 Col. Villa de Fuente. Piedras Negras Coah. MX') ?>
                             </p>
-                            <p><?= __('Sucursal: Lib. Armando Treviño 704 Col. Guillén. Piedras Negras Coah. MX') ?></p>
+                            <p><?= translate('Sucursal: Lib. Armando Treviño 704 Col. Guillén. Piedras Negras Coah. MX') ?></p>
                         </div>
                     </div>
                     <div class="contact-item">
@@ -466,7 +466,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <i class="fas fa-map-marked-alt"></i>
                         </div>
                         <div>
-                            <h3><?= __('Ubicación') ?></h3>
+                            <h3><?= translate('Ubicación') ?></h3>
                             <div class="google-map">
                                 <iframe
                                     src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1237.571915066888!2d-100.56144852170576!3d28.678218303007753!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x865f8b0826f89e63%3A0xdae232dc26abc76a!2sClimas%20del%20Norte!5e0!3m2!1ses!2smx!4v1743301110858!5m2!1ses!2smx"
@@ -480,9 +480,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <i class="fas fa-clock"></i>
                         </div>
                         <div>
-                            <h3><?= __('Horario') ?></h3>
-                            <p><?= __('Lunes a Viernes: 9:00 AM - 6:00 PM') ?></p>
-                            <p><?= __('Sábados: 9:00 AM - 1:00 PM') ?></p>
+                            <h3><?= translate('Horario') ?></h3>
+                            <p><?= translate('Lunes a Viernes: 9:00 AM - 6:00 PM') ?></p>
+                            <p><?= translate('Sábados: 9:00 AM - 1:00 PM') ?></p>
                         </div>
                     </div>
                 </div>
@@ -490,28 +490,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <form class="contact-form" method="POST" action="index.php#contacto"
                     onsubmit="return validarFormulario()">
                     <div class="form-group">
-                        <input type="text" name="nombre" class="form-control" placeholder="<?= __('Nombre completo') ?>"
+                        <input type="text" name="nombre" class="form-control" placeholder="<?= translate('Nombre completo') ?>"
                             required minlength="3" maxlength="50" pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+"
-                            title="<?= __('Solo letras y espacios') ?>">
+                            title="<?= translate('Solo letras y espacios') ?>">
                         <small class="error-message" id="nombre-error"></small>
                     </div>
                     <div class="form-group">
                         <input type="email" name="email" class="form-control"
-                            placeholder="<?= __('Correo electrónico') ?>" required
+                            placeholder="<?= translate('Correo electrónico') ?>" required
                             pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
                         <small class="error-message" id="email-error"></small>
                     </div>
                     <div class="form-group">
-                        <input type="tel" name="telefono" class="form-control" placeholder="<?= __('Teléfono') ?>"
-                            required pattern="[0-9]{10}" title="<?= __('10 dígitos sin espacios') ?>">
+                        <input type="tel" name="telefono" class="form-control" placeholder="<?= translate('Teléfono') ?>"
+                            required pattern="[0-9]{10}" title="<?= translate('10 dígitos sin espacios') ?>">
                         <small class="error-message" id="telefono-error"></small>
                     </div>
 
                     <!-- Servicios seleccionados -->
                     <div class="selected-services">
-                        <h4><?= __('Servicios seleccionados:') ?></h4>
+                        <h4><?= translate('Servicios seleccionados:') ?></h4>
                         <?php if (empty($_SESSION['carrito'])): ?>
-                        <p><?= __('No has seleccionado ningún servicio') ?></p>
+                        <p><?= translate('No has seleccionado ningún servicio') ?></p>
                         <?php else: ?>
                         <ul>
                             <?php foreach ($_SESSION['carrito'] as $key => $item): ?>
@@ -522,15 +522,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             </li>
                             <?php endforeach; ?>
                         </ul>
-                        <p class="cart-total"><?= __('Total:') ?> $<?php echo number_format($total, 2); ?></p>
+                        <p class="cart-total"><?= translate('Total:') ?> $<?php echo number_format($total, 2); ?></p>
                         <?php endif; ?>
                     </div>
 
                     <div class="form-group">
-                        <textarea name="mensaje" class="form-control" rows="5" placeholder="<?= __('Mensaje') ?>"
+                        <textarea name="mensaje" class="form-control" rows="5" placeholder="<?= translate('Mensaje') ?>"
                             required></textarea>
                     </div>
-                    <button type="submit" class="cta-button"><?= __('Enviar Solicitud') ?></button>
+                    <button type="submit" class="cta-button"><?= translate('Enviar Solicitud') ?></button>
                 </form>
             </div>
         </div>
@@ -540,8 +540,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         <div class="container">
             <div class="footer-grid">
                 <div class="footer-section">
-                    <h3><?= __('Sobre Nosotros') ?></h3>
-                    <p><?= __('Climas del Norte es tu aliado en soluciones de climatización. Expertos en instalación y mantenimiento de sistemas de aire acondicionado.') ?>
+                    <h3><?= translate('Sobre Nosotros') ?></h3>
+                    <p><?= translate('Climas del Norte es tu aliado en soluciones de climatización. Expertos en instalación y mantenimiento de sistemas de aire acondicionado.') ?>
                     </p>
                     <div class="social-links">
                         <a href="https://m.facebook.com/profile.php?id=142211439205918"><i
@@ -552,25 +552,25 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                 </div>
                 <div class="footer-section">
-                    <h3><?= __('Enlaces Rápidos') ?></h3>
+                    <h3><?= translate('Enlaces Rápidos') ?></h3>
                     <ul class="footer-links">
-                        <li><a href="#inicio"><?= __('Inicio') ?></a></li>
-                        <li><a href="#servicios"><?= __('Servicios') ?></a></li>
-                        <li><a href="#galeria"><?= __('Galería') ?></a></li>
-                        <li><a href="#contacto"><?= __('Contacto') ?></a></li>
+                        <li><a href="#inicio"><?= translate('Inicio') ?></a></li>
+                        <li><a href="#servicios"><?= translate('Servicios') ?></a></li>
+                        <li><a href="#galeria"><?= translate('Galería') ?></a></li>
+                        <li><a href="#contacto"><?= translate('Contacto') ?></a></li>
                     </ul>
                 </div>
                 <div class="footer-section">
-                    <h3><?= __('Servicios') ?></h3>
+                    <h3><?= translate('Servicios') ?></h3>
                     <ul class="footer-links">
-                        <li><?= __('Reparacion') ?></li>
-                        <li><?= __('Instalacion') ?></li>
-                        <li><?= __('Mantenimiento') ?></li>
+                        <li><?= translate('Reparacion') ?></li>
+                        <li><?= translate('Instalacion') ?></li>
+                        <li><?= translate('Mantenimiento') ?></li>
                     </ul>
                 </div>
             </div>
             <div class="copyright">
-                <p>&copy; <?= __('Soluciones Confortables S. A. de C. V. Todos los derechos reservados.') ?></p>
+                <p>&copy; <?= translate('Soluciones Confortables S. A. de C. V. Todos los derechos reservados.') ?></p>
             </div>
         </div>
     </footer>

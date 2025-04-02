@@ -1,0 +1,4 @@
+/.scannerwork
+/vendor
+composer.json
+composer.lock
