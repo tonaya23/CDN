@@ -54,7 +54,7 @@ if (isset($_GET['agregar']) && !empty($_GET['agregar'])) {
         case 'Mantenimiento': $precio = 800; break;
     }
     $_SESSION['carrito'][] = ['servicio' => $servicio, 'precio' => $precio];
-    header("Location: index.php#contacto");
+    header("Location: index.php#servicios");
     exit;
 }
 
