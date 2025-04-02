@@ -51,8 +51,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     $valid = true;
 
-    if (strlen($nombre) < 3 || strlen($nombre) > 50) {
-        $error = translate('El nombre debe tener entre 3 y 50 caracteres');
+    if (strlen($nombre) < 5 || strlen($nombre) > 50 || !preg_match('/^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/', $nombre)) {
+        $error = translate('El nombre debe tener entre 5 y 50 caracteres y solo letras');
         $valid = false;
     }
 
@@ -71,7 +71,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     }
 
     if (!empty($telefono) && !preg_match('/^[0-9]{10}$/', $telefono)) {
-        $error = translate('El teléfono debe tener 10 dígitos');
+        $error = translate('El teléfono debe tener 10 dígitos y solo números');
         $valid = false;
     }
 
@@ -140,7 +140,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="form-group">
                 <input type="text" name="nombre" class="form-control" placeholder="<?= translate('Nombre completo') ?>" 
                        value="<?= htmlspecialchars($nombre) ?>" pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+" 
-                       title="<?= translate('Solo letras y espacios') ?>" required>
+                       minlength="5" maxlength="50" title="<?= translate('Solo letras, mínimo 5 caracteres') ?>" required>
                 <small class="error-message" id="nombre-error"></small>
             </div>
             <div class="form-group">
@@ -151,7 +151,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             <div class="form-group">
                 <input type="tel" name="telefono" class="form-control" placeholder="<?= translate('Teléfono (10 dígitos)') ?>" 
                        value="<?= htmlspecialchars($telefono) ?>" pattern="[0-9]{10}" 
-                       title="<?= translate('10 dígitos sin espacios') ?>">
+                       title="<?= translate('Solo números, 10 dígitos') ?>">
                 <small class="error-message" id="telefono-error"></small>
             </div>
             <div class="form-group">
@@ -195,8 +195,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         errors.forEach(e => e.textContent = '');
 
         const nombre = document.querySelector('[name="nombre"]');
-        if (nombre.value.length < 3 || nombre.value.length > 50) {
-            document.getElementById('nombre-error').textContent = '<?= translate('El nombre debe tener entre 3 y 50 caracteres') ?>';
+        if (nombre.value.length < 5 || nombre.value.length > 50 || !/^[A-Za-záéíóúÁÉÍÓÚñÑ\s]+$/.test(nombre.value)) {
+            document.getElementById('nombre-error').textContent = '<?= translate('El nombre debe tener entre 5 y 50 caracteres y solo letras') ?>';
             isValid = false;
         }
 
@@ -208,7 +208,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         const telefono = document.querySelector('[name="telefono"]');
         if (telefono.value && !/^[0-9]{10}$/.test(telefono.value)) {
-            document.getElementById('telefono-error').textContent = '<?= translate('El teléfono debe tener 10 dígitos') ?>';
+            document.getElementById('telefono-error').textContent = '<?= translate('El teléfono debe tener 10 dígitos y solo números') ?>';
             isValid = false;
         }
 

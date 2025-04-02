@@ -1,42 +1,33 @@
 <?php
 session_start();
 
-// Configuración de idioma
 if (!isset($_SESSION['lang'])) {
-    $_SESSION['lang'] = 'es'; // Idioma por defecto
+    $_SESSION['lang'] = 'es';
 }
 
 if (isset($_GET['lang']) && in_array($_GET['lang'], ['es', 'en'])) {
     $_SESSION['lang'] = $_GET['lang'];
-    header("Location: " . strtok($_SERVER['REQUEST_URI'], '?')); // Elimina parámetros de URL
+    header("Location: " . strtok($_SERVER['REQUEST_URI'], '?'));
     exit;
 }
 
-// Carga el autoload de Composer
 require_once 'vendor/autoload.php';
 
-// Función de traducción automática
 function translate($text) {
     static $translator = null;
-    
-    if ($_SESSION['lang'] == 'es') {
-        return $text; // No traducir si ya está en español
-    }
-    
+    if ($_SESSION['lang'] == 'es') return $text;
     if ($translator === null) {
         $translator = new Stichoza\GoogleTranslate\GoogleTranslate();
         $translator->setSource('es');
         $translator->setTarget($_SESSION['lang']);
     }
-    
     try {
         return $translator->translate($text);
     } catch (Exception $e) {
-        return $text; // Si falla la traducción, devuelve el texto original
+        return $text;
     }
 }
 
-// Cerrar sesión
 if (isset($_GET['logout'])) {
     session_unset();
     session_destroy();
@@ -44,44 +35,29 @@ if (isset($_GET['logout'])) {
     exit;
 }
 
-// Inicializar el carrito si no existe
 if (!isset($_SESSION['carrito'])) {
     $_SESSION['carrito'] = [];
 }
 
-// Vaciar el carrito completamente
 if (isset($_GET['vaciar'])) {
     $_SESSION['carrito'] = [];
     header("Location: index.php#contacto");
     exit;
 }
 
-// Manejar agregar al carrito
 if (isset($_GET['agregar']) && !empty($_GET['agregar'])) {
     $servicio = $_GET['agregar'];
     $precio = 0;
-
     switch ($servicio) {
-        case 'Reparacion':
-            $precio = 1500;
-            break;
-        case 'Instalacion':
-            $precio = 2500;
-            break;
-        case 'Mantenimiento':
-            $precio = 800;
-            break;
+        case 'Reparacion': $precio = 1500; break;
+        case 'Instalacion': $precio = 2500; break;
+        case 'Mantenimiento': $precio = 800; break;
     }
-
-    $_SESSION['carrito'][] = [
-        'servicio' => $servicio,
-        'precio' => $precio
-    ];
+    $_SESSION['carrito'][] = ['servicio' => $servicio, 'precio' => $precio];
     header("Location: index.php#contacto");
     exit;
 }
 
-// Eliminar un elemento del carrito
 if (isset($_GET['eliminar']) && is_numeric($_GET['eliminar']) && isset($_SESSION['carrito'][$_GET['eliminar']])) {
     unset($_SESSION['carrito'][$_GET['eliminar']]);
     $_SESSION['carrito'] = array_values($_SESSION['carrito']);
@@ -89,59 +65,62 @@ if (isset($_GET['eliminar']) && is_numeric($_GET['eliminar']) && isset($_SESSION
     exit;
 }
 
-// Calcular total
 $total = 0;
 foreach ($_SESSION['carrito'] as $item) {
     $total += $item['precio'];
 }
 
-// Procesar el formulario cuando se envía
+$error = '';
+$success = '';
+
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
     $conn = new mysqli("localhost", "root", "", "cdn_servicios");
-    
-    if ($conn->connect_error) {
-        die("Error de conexión: " . $conn->connect_error);
-    }
-    
+    if ($conn->connect_error) die("Error de conexión: " . $conn->connect_error);
+
     $nombre = filter_var($_POST['nombre'], FILTER_SANITIZE_STRING);
     $email = filter_var($_POST['email'], FILTER_SANITIZE_EMAIL);
     $telefono = filter_var($_POST['telefono'], FILTER_SANITIZE_STRING);
     $mensaje = filter_var($_POST['mensaje'], FILTER_SANITIZE_STRING);
     $usuario_id = $_SESSION['usuario_id'];
-    
-    // Insertar o actualizar cliente
-    $sql = "INSERT INTO clientes (usuario_id, nombre, email, telefono) 
-            VALUES (?, ?, ?, ?) 
-            ON DUPLICATE KEY UPDATE nombre = ?, email = ?, telefono = ?";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("issssss", $usuario_id, $nombre, $email, $telefono, $nombre, $email, $telefono);
-    $stmt->execute();
-    $cliente_id = $conn->insert_id ?: $conn->query("SELECT id FROM clientes WHERE usuario_id = $usuario_id")->fetch_assoc()['id'];
-    
-    if (!empty($_SESSION['carrito'])) {
-        $sql = "INSERT INTO pedidos (usuario_id, cliente_id, total) VALUES (?, ?, ?)";
+
+    if (empty($_SESSION['carrito'])) {
+        $error = translate('Debes seleccionar al menos un servicio para enviar la solicitud');
+    } elseif (strlen($nombre) < 5) {
+        $error = translate('El nombre debe tener al menos 5 caracteres');
+    } else {
+        $sql = "INSERT INTO clientes (usuario_id, nombre, email, telefono) 
+                VALUES (?, ?, ?, ?) 
+                ON DUPLICATE KEY UPDATE nombre = ?, email = ?, telefono = ?";
         $stmt = $conn->prepare($sql);
-        $stmt->bind_param("iid", $usuario_id, $cliente_id, $total);
+        $stmt->bind_param("issssss", $usuario_id, $nombre, $email, $telefono, $nombre, $email, $telefono);
         $stmt->execute();
-        $pedido_id = $conn->insert_id;
-        
-        $sql = "INSERT INTO detalle_pedidos (pedido_id, servicio, precio) VALUES (?, ?, ?)";
-        $stmt = $conn->prepare($sql);
-        
-        foreach ($_SESSION['carrito'] as $item) {
-            $stmt->bind_param("isd", $pedido_id, $item['servicio'], $item['precio']);
+        $cliente_id = $conn->insert_id ?: $conn->query("SELECT id FROM clientes WHERE usuario_id = $usuario_id")->fetch_assoc()['id'];
+
+        if (!empty($_SESSION['carrito'])) {
+            $sql = "INSERT INTO pedidos (usuario_id, cliente_id, total) VALUES (?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+            $stmt->bind_param("iid", $usuario_id, $cliente_id, $total);
             $stmt->execute();
+            $pedido_id = $conn->insert_id;
+
+            $sql = "INSERT INTO detalle_pedidos (pedido_id, servicio, precio) VALUES (?, ?, ?)";
+            $stmt = $conn->prepare($sql);
+
+            foreach ($_SESSION['carrito'] as $item) {
+                $stmt->bind_param("isd", $pedido_id, $item['servicio'], $item['precio']);
+                $stmt->execute();
+            }
+
+            $_SESSION['carrito'] = [];
+            $success = translate('¡Gracias por tu solicitud! Nos pondremos en contacto contigo pronto.');
         }
-        
-        $_SESSION['carrito'] = [];
-        $mensaje_exito = translate("¡Gracias por tu solicitud! Nos pondremos en contacto contigo pronto.");
+        $conn->close();
     }
-    
-    $conn->close();
 }
 ?>
 <!DOCTYPE html>
 <html lang="<?php echo $_SESSION['lang']; ?>">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -149,6 +128,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
     <header>
         <div class="container nav-container">
@@ -173,15 +153,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
                     <li><a href="#testimonios"><?= translate('Testimonios') ?></a></li>
                     <li><a href="#contacto"><?= translate('Contacto') ?></a></li>
                     <?php if (isset($_SESSION['usuario_id'])): ?>
-                        <li class="user-menu">
-                            <a href="#"><i class="fas fa-user"></i> <?= htmlspecialchars($_SESSION['usuario_nombre']) ?></a>
-                            <div class="user-dropdown">
-                                <a href="?logout"><?= translate('Cerrar Sesión') ?></a>
-                            </div>
-                        </li>
+                    <li class="user-menu">
+                        <a href="#"><i class="fas fa-user"></i> <?= htmlspecialchars($_SESSION['usuario_nombre']) ?></a>
+                        <div class="user-dropdown">
+                            <a href="?logout"><?= translate('Cerrar Sesión') ?></a>
+                        </div>
+                    </li>
                     <?php else: ?>
-                        <li><a href="login.php"><?= translate('Iniciar Sesión') ?></a></li>
-                        <li><a href="register.php"><?= translate('Registrarse') ?></a></li>
+                    <li><a href="login.php"><?= translate('Iniciar Sesión') ?></a></li>
+                    <li><a href="register.php"><?= translate('Registrarse') ?></a></li>
                     <?php endif; ?>
                     <li class="cart-icon" id="cart-icon">
                         <i class="fas fa-shopping-cart"></i>
@@ -189,29 +169,29 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
                         <div class="cart-dropdown" id="cart-dropdown">
                             <h3><?= translate('Mi Carrito') ?></h3>
                             <?php if (empty($_SESSION['carrito'])): ?>
-                                <p class="empty-cart"><?= translate('Tu carrito está vacío') ?></p>
+                            <p class="empty-cart"><?= translate('Tu carrito está vacío') ?></p>
                             <?php else: ?>
-                                <?php foreach ($_SESSION['carrito'] as $key => $item): ?>
-                                    <div class="cart-item">
-                                        <div><strong><?= htmlspecialchars($item['servicio']) ?></strong></div>
-                                        <div>
-                                            $<?= number_format($item['precio'], 2) ?>
-                                            <a href="?eliminar=<?= $key ?>" class="delete-item"><i class="fas fa-trash"></i></a>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                                <div class="cart-total">
-                                    <span>Total:</span>
-                                    <span>$<?= number_format($total, 2) ?></span>
+                            <?php foreach ($_SESSION['carrito'] as $key => $item): ?>
+                            <div class="cart-item">
+                                <div><strong><?= htmlspecialchars($item['servicio']) ?></strong></div>
+                                <div>
+                                    $<?= number_format($item['precio'], 2) ?>
+                                    <a href="?eliminar=<?= $key ?>" class="delete-item"><i class="fas fa-trash"></i></a>
                                 </div>
-                                <div style="text-align: center; margin-top: 15px;">
-                                    <a href="#contacto" class="add-to-cart"><?= translate('Completar Solicitud') ?></a>
-                                </div>
+                            </div>
+                            <?php endforeach; ?>
+                            <div class="cart-total">
+                                <span>Total:</span>
+                                <span>$<?= number_format($total, 2) ?></span>
+                            </div>
+                            <div style="text-align: center; margin-top: 15px;">
+                                <a href="#contacto" class="add-to-cart"><?= translate('Completar Solicitud') ?></a>
+                            </div>
                             <?php endif; ?>
                             <?php if (!empty($_SESSION['carrito'])): ?>
-                                <div style="text-align: center; margin-top: 10px;">
-                                    <a href="?vaciar" class="clear-cart"><?= translate('Vaciar carrito') ?></a>
-                                </div>
+                            <div style="text-align: center; margin-top: 10px;">
+                                <a href="?vaciar" class="clear-cart"><?= translate('Vaciar carrito') ?></a>
+                            </div>
                             <?php endif; ?>
                         </div>
                     </li>
@@ -250,7 +230,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
                     <div class="service-image"><img src="img/reparacion.jpg" alt="Reparación"></div>
                     <div class="service-content">
                         <h3><?= translate('Reparación') ?></h3>
-                        <p><?= translate('Nuestros Técnicos están capacitados y certificados en el área de refrigeración y aire acondicionado...') ?></p>
+                        <p><?= translate('Nuestros Técnicos están capacitados y certificados en el área de refrigeración y aire acondicionado...') ?>
+                        </p>
                         <a href="?agregar=Reparacion" class="add-to-cart"><?= translate('Agregar') ?></a>
                     </div>
                 </div>
@@ -258,7 +239,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
                     <div class="service-image"><img src="img/instalacion.jpg" alt="Instalación"></div>
                     <div class="service-content">
                         <h3><?= translate('Instalación') ?></h3>
-                        <p><?= translate('Las instalaciones realizadas de forma profesional le garantizan un mejor rendimiento...') ?></p>
+                        <p><?= translate('Las instalaciones realizadas de forma profesional le garantizan un mejor rendimiento...') ?>
+                        </p>
                         <a href="?agregar=Instalacion" class="add-to-cart"><?= translate('Agregar') ?></a>
                     </div>
                 </div>
@@ -266,7 +248,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
                     <div class="service-image"><img src="img/mantenimiento.jpg" alt="Mantenimiento"></div>
                     <div class="service-content">
                         <h3><?= translate('Mantenimiento') ?></h3>
-                        <p><?= translate('Un mantenimiento preventivo oportuno puede asegurarle larga vida a su equipo...') ?></p>
+                        <p><?= translate('Un mantenimiento preventivo oportuno puede asegurarle larga vida a su equipo...') ?>
+                        </p>
                         <a href="?agregar=Mantenimiento" class="add-to-cart"><?= translate('Agregar') ?></a>
                     </div>
                 </div>
@@ -306,12 +289,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
         <div class="container">
             <h2 class="section-title"><?= translate('Quiénes Somos') ?></h2>
             <div class="about-content">
-                <p class="about-description"><?= translate('Somos una empresa líder en servicios de climatización con más de 20 años de experiencia...') ?></p>
+                <p class="about-description">
+                    <?= translate('Somos una empresa líder en servicios de climatización con más de 20 años de experiencia...') ?>
+                </p>
                 <div class="pillars-grid">
                     <div class="pillar-card">
                         <div class="pillar-icon"><i class="fas fa-bullseye"></i></div>
                         <h3><?= translate('Misión') ?></h3>
-                        <p><?= translate('Proporcionar soluciones integrales de climatización que mejoren la calidad de vida...') ?></p>
+                        <p><?= translate('Proporcionar soluciones integrales de climatización que mejoren la calidad de vida...') ?>
+                        </p>
                     </div>
                     <div class="pillar-card">
                         <div class="pillar-icon"><i class="fas fa-eye"></i></div>
@@ -338,10 +324,18 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
         <div class="container">
             <h2 class="section-title"><?= translate('Galería de Proyectos') ?></h2>
             <div class="gallery-grid">
-                <div class="gallery-item"><img src="img/pic4.jpg" alt="Proyecto 1"><div class="gallery-overlay"><i class="fas fa-search-plus"></i></div></div>
-                <div class="gallery-item"><img src="img/pic5.jpg" alt="Proyecto 2"><div class="gallery-overlay"><i class="fas fa-search-plus"></i></div></div>
-                <div class="gallery-item"><img src="img/pic6.jpg" alt="Proyecto 3"><div class="gallery-overlay"><i class="fas fa-search-plus"></i></div></div>
-                <div class="gallery-item"><img src="img/pic7.jpg" alt="Proyecto 4"><div class="gallery-overlay"><i class="fas fa-search-plus"></i></div></div>
+                <div class="gallery-item"><img src="img/pic4.jpg" alt="Proyecto 1">
+                    <div class="gallery-overlay"><i class="fas fa-search-plus"></i></div>
+                </div>
+                <div class="gallery-item"><img src="img/pic5.jpg" alt="Proyecto 2">
+                    <div class="gallery-overlay"><i class="fas fa-search-plus"></i></div>
+                </div>
+                <div class="gallery-item"><img src="img/pic6.jpg" alt="Proyecto 3">
+                    <div class="gallery-overlay"><i class="fas fa-search-plus"></i></div>
+                </div>
+                <div class="gallery-item"><img src="img/pic7.jpg" alt="Proyecto 4">
+                    <div class="gallery-overlay"><i class="fas fa-search-plus"></i></div>
+                </div>
             </div>
         </div>
     </section>
@@ -352,7 +346,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
             <div class="testimonial-slider">
                 <div class="testimonial-card">
                     <div class="testimonial-image"><img src="img/clientefiel.jpg" alt="Cliente 1"></div>
-                    <p class="testimonial-text"><?= translate('"Excelente servicio, muy profesionales y puntuales. Totalmente recomendados."') ?></p>
+                    <p class="testimonial-text">
+                        <?= translate('"Excelente servicio, muy profesionales y puntuales. Totalmente recomendados."') ?>
+                    </p>
                     <h4>Juan Pérez</h4>
                     <p class="testimonial-role"><?= translate('Cliente Residencial') ?></p>
                 </div>
@@ -363,13 +359,19 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
     <section class="contact scroll-animation" id="contacto">
         <div class="container">
             <h2 class="section-title"><?= translate('Contáctanos') ?></h2>
-            <?php if (isset($mensaje_exito)): ?>
-                <div class="success-message"><?= htmlspecialchars($mensaje_exito) ?></div>
+            <?php if ($success): ?>
+            <div class="success-message"><?= htmlspecialchars($success) ?></div>
+            <?php endif; ?>
+            <?php if ($error): ?>
+            <div class="error-message"><?= htmlspecialchars($error) ?></div>
             <?php endif; ?>
             <div class="contact-grid">
-                <div class="contact-info">
+            <div class="contact-info">
+                    <!-- Información de contacto - sin cambios -->
                     <div class="contact-item">
-                        <div class="contact-icon"><i class="fas fa-phone"></i></div>
+                        <div class="contact-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
                         <div>
                             <h3><?= translate('Teléfonos') ?></h3>
                             <p>878-763-5533</p>
@@ -377,24 +379,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
                         </div>
                     </div>
                     <div class="contact-item">
-                        <div class="contact-icon"><i class="fas fa-map-marker-alt"></i></div>
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
                         <div>
                             <h3><?= translate('Dirección') ?></h3>
-                            <p><?= translate('Venustiano Carranza No. 909 Col. Villa de Fuente. Piedras Negras Coah. MX') ?></p>
+                            <p><?= translate('Venustiano Carranza No. 909 Col. Villa de Fuente. Piedras Negras Coah. MX') ?>
+                            </p>
                             <p><?= translate('Sucursal: Lib. Armando Treviño 704 Col. Guillén. Piedras Negras Coah. MX') ?></p>
                         </div>
                     </div>
                     <div class="contact-item">
-                        <div class="contact-icon"><i class="fas fa-map-marked-alt"></i></div>
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marked-alt"></i>
+                        </div>
                         <div>
                             <h3><?= translate('Ubicación') ?></h3>
                             <div class="google-map">
-                                <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1237.571915066888!2d-100.56144852170576!3d28.678218303007753!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x865f8b0826f89e63%3A0xdae232dc26abc76a!2sClimas%20del%20Norte!5e0!3m2!1ses!2smx!4v1743301110858!5m2!1ses!2smx" width="400" height="300" style="border:0;" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade"></iframe>
+                                <iframe
+                                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d1237.571915066888!2d-100.56144852170576!3d28.678218303007753!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x865f8b0826f89e63%3A0xdae232dc26abc76a!2sClimas%20del%20Norte!5e0!3m2!1ses!2smx!4v1743301110858!5m2!1ses!2smx"
+                                    width="400" height="300" style="border:0;" allowfullscreen="" loading="lazy"
+                                    referrerpolicy="no-referrer-when-downgrade"></iframe>
                             </div>
                         </div>
                     </div>
                     <div class="contact-item">
-                        <div class="contact-icon"><i class="fas fa-clock"></i></div>
+                        <div class="contact-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
                         <div>
                             <h3><?= translate('Horario') ?></h3>
                             <p><?= translate('Lunes a Viernes: 9:00 AM - 6:00 PM') ?></p>
@@ -403,52 +415,62 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
                     </div>
                 </div>
                 <?php if (isset($_SESSION['usuario_id'])): ?>
-                    <form class="contact-form" method="POST" action="index.php#contacto" onsubmit="return validarFormulario()">
-                        <div class="form-group">
-                            <input type="text" name="nombre" class="form-control" placeholder="<?= translate('Nombre completo') ?>" required minlength="3" maxlength="50" pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+" title="<?= translate('Solo letras y espacios') ?>">
-                            <small class="error-message" id="nombre-error"></small>
-                        </div>
-                        <div class="form-group">
-                            <input type="email" name="email" class="form-control" placeholder="<?= translate('Correo electrónico') ?>" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
-                            <small class="error-message" id="email-error"></small>
-                        </div>
-                        <div class="form-group">
-                            <input type="tel" name="telefono" class="form-control" placeholder="<?= translate('Teléfono') ?>" required pattern="[0-9]{10}" title="<?= translate('10 dígitos sin espacios') ?>">
-                            <small class="error-message" id="telefono-error"></small>
-                        </div>
-                        <div class="selected-services">
-                            <h4><?= translate('Servicios seleccionados:') ?></h4>
-                            <?php if (empty($_SESSION['carrito'])): ?>
-                                <p><?= translate('No has seleccionado ningún servicio') ?></p>
-                            <?php else: ?>
-                                <ul>
-                                    <?php foreach ($_SESSION['carrito'] as $key => $item): ?>
-                                        <li>
-                                            <?= htmlspecialchars($item['servicio']) ?> - $<?= number_format($item['precio'], 2) ?>
-                                            <a href="?eliminar=<?= $key ?>" class="delete-item"><i class="fas fa-times"></i></a>
-                                        </li>
-                                    <?php endforeach; ?>
-                                </ul>
-                                <p class="cart-total"><?= translate('Total:') ?> $<?= number_format($total, 2) ?></p>
-                            <?php endif; ?>
-                        </div>
-                        <div class="form-group">
-                            <textarea name="mensaje" class="form-control" rows="5" placeholder="<?= translate('Mensaje') ?>" required></textarea>
-                        </div>
-                        <button type="submit" class="cta-button"><?= translate('Enviar Solicitud') ?></button>
-                    </form>
+                <form class="contact-form" method="POST" action="index.php#contacto"
+                    onsubmit="return validarFormulario()">
+                    <div class="form-group">
+                        <input type="text" name="nombre" class="form-control"
+                            placeholder="<?= translate('Nombre completo') ?>" required minlength="5" maxlength="50"
+                            pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+"
+                            title="<?= translate('Solo letras y espacios, mínimo 5 caracteres') ?>">
+                        <small class="error-message" id="nombre-error"></small>
+                    </div>
+                    <div class="form-group">
+                        <input type="email" name="email" class="form-control"
+                            placeholder="<?= translate('Correo electrónico') ?>" required
+                            pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,}$">
+                        <small class="error-message" id="email-error"></small>
+                    </div>
+                    <div class="form-group">
+                        <input type="tel" name="telefono" class="form-control"
+                            placeholder="<?= translate('Teléfono') ?>" required pattern="[0-9]{10}"
+                            title="<?= translate('10 dígitos sin espacios') ?>">
+                        <small class="error-message" id="telefono-error"></small>
+                    </div>
+                    <div class="selected-services">
+                        <h4><?= translate('Servicios seleccionados:') ?></h4>
+                        <?php if (empty($_SESSION['carrito'])): ?>
+                        <p><?= translate('No has seleccionado ningún servicio') ?></p>
+                        <?php else: ?>
+                        <ul>
+                            <?php foreach ($_SESSION['carrito'] as $key => $item): ?>
+                            <li>
+                                <?= htmlspecialchars($item['servicio']) ?> - $<?= number_format($item['precio'], 2) ?>
+                                <a href="?eliminar=<?= $key ?>" class="delete-item"><i class="fas fa-times"></i></a>
+                            </li>
+                            <?php endforeach; ?>
+                        </ul>
+                        <p class="cart-total"><?= translate('Total:') ?> $<?= number_format($total, 2) ?></p>
+                        <?php endif; ?>
+                    </div>
+                    <div class="form-group">
+                        <textarea name="mensaje" class="form-control" rows="5" placeholder="<?= translate('Mensaje') ?>"
+                            required></textarea>
+                    </div>
+                    <button type="submit" class="cta-button"><?= translate('Enviar Solicitud') ?></button>
+                </form>
                 <?php else: ?>
-                    <div class="login-required">
-                        <div class="login-message">
-                            <i class="fas fa-lock"></i>
-                            <h3><?= translate('Inicia sesión para completar tu solicitud') ?></h3>
-                            <p><?= translate('Para poder enviar una solicitud de servicio, debes iniciar sesión o crear una cuenta.') ?></p>
-                            <div class="login-buttons">
-                                <a href="login.php" class="cta-button"><?= translate('Iniciar Sesión') ?></a>
-                                <a href="register.php" class="secondary-button"><?= translate('Crear Cuenta') ?></a>
-                            </div>
+                <div class="login-required">
+                    <div class="login-message">
+                        <i class="fas fa-lock"></i>
+                        <h3><?= translate('Inicia sesión para completar tu solicitud') ?></h3>
+                        <p><?= translate('Para poder enviar una solicitud de servicio, debes iniciar sesión o crear una cuenta.') ?>
+                        </p>
+                        <div class="login-buttons">
+                            <a href="login.php" class="cta-button"><?= translate('Iniciar Sesión') ?></a>
+                            <a href="register.php" class="secondary-button"><?= translate('Crear Cuenta') ?></a>
                         </div>
                     </div>
+                </div>
                 <?php endif; ?>
             </div>
         </div>
@@ -461,8 +483,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
                     <h3><?= translate('Sobre Nosotros') ?></h3>
                     <p><?= translate('Climas del Norte es tu aliado en soluciones de climatización...') ?></p>
                     <div class="social-links">
-                        <a href="https://m.facebook.com/profile.php?id=142211439205918"><i class="fab fa-facebook-f"></i></a>
-                        <a href="https://www.instagram.com/climas.del.norte/?hl=es-la"><i class="fab fa-instagram"></i></a>
+                        <a href="https://m.facebook.com/profile.php?id=142211439205918"><i
+                                class="fab fa-facebook-f"></i></a>
+                        <a href="https://www.instagram.com/climas.del.norte/?hl=es-la"><i
+                                class="fab fa-instagram"></i></a>
                         <a href="https://wa.me/8787635533"><i class="fab fa-whatsapp"></i></a>
                     </div>
                 </div>
@@ -508,23 +532,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
         const nombre = document.querySelector('input[name="nombre"]');
         const email = document.querySelector('input[name="email"]');
         const telefono = document.querySelector('input[name="telefono"]');
-        
+        const carrito = <?php echo json_encode($_SESSION['carrito']); ?>;
+
         document.querySelectorAll('.error-message').forEach(el => el.textContent = '');
 
-        if (!nombre.checkValidity()) {
-            document.getElementById('nombre-error').textContent = '<?= translate('Por favor, ingresa un nombre válido') ?>';
+        if (!nombre.checkValidity() || nombre.value.length < 5) {
+            document.getElementById('nombre-error').textContent =
+                '<?= translate('El nombre debe tener al menos 5 caracteres y solo letras') ?>';
             isValid = false;
         }
         if (!email.checkValidity()) {
-            document.getElementById('email-error').textContent = '<?= translate('Por favor, ingresa un correo válido') ?>';
+            document.getElementById('email-error').textContent =
+                '<?= translate('Por favor, ingresa un correo válido') ?>';
             isValid = false;
         }
         if (!telefono.checkValidity()) {
-            document.getElementById('telefono-error').textContent = '<?= translate('Por favor, ingresa un teléfono válido de 10 dígitos') ?>';
+            document.getElementById('telefono-error').textContent =
+                '<?= translate('Por favor, ingresa un teléfono válido de 10 dígitos') ?>';
             isValid = false;
         }
-        
-        return isValid;
+        if (!carrito || carrito.length === 0) {
+            alert('<?= translate('Debes seleccionar al menos un servicio para enviar la solicitud') ?>');
+            isValid = false;
+        }
+
+        if (!isValid) return false;
+        return true;
     }
 
     document.addEventListener('DOMContentLoaded', function() {
@@ -544,4 +577,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_SESSION['usuario_id'])) {
     });
     </script>
 </body>
+
 </html>
