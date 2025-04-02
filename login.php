@@ -143,9 +143,10 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 </div>
             </div>
             <div class="form-group">
-                <div class="g-recaptcha" data-sitekey="6Ld-WAcrAAAAAEPyetILsZeyMT3OovHUyYoMbdOR"></div> <!-- Reemplaza con tu Site Key -->
+                <div class="g-recaptcha" data-sitekey="6Ld-WAcrAAAAAEPyetILsZeyMT3OovHUyYoMbdOR"></div>
             </div>
             <button type="submit" class="auth-btn"><?= translate('Iniciar Sesión') ?></button>
+            <a href="forgot_password.php" class="auth-link"><?= translate('¿Olvidaste tu contraseña?') ?></a>
             <a href="register.php" class="auth-link"><?= translate('¿No tienes cuenta? Regístrate aquí') ?></a>
             <a href="index.php" class="back-to-home"><?= translate('Volver a la página principal') ?></a>
         </form>

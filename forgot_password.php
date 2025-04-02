@@ -13,6 +13,9 @@ if (isset($_GET['lang']) && in_array($_GET['lang'], ['es', 'en'])) {
 
 require_once 'vendor/autoload.php';
 
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\Exception;
+
 function translate($text) {
     static $translator = null;
     if ($_SESSION['lang'] == 'es') return $text;
@@ -52,33 +55,37 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $result = $stmt->get_result();
 
         if ($result->num_rows === 1) {
-            // Generar un token único
+            // Generar token
             $token = bin2hex(random_bytes(32));
-
-            // Guardar el token en la base de datos
             $stmt = $conn->prepare("INSERT INTO password_resets (email, token) VALUES (?, ?) 
                                     ON DUPLICATE KEY UPDATE token = ?, created_at = NOW()");
             $stmt->bind_param("sss", $email, $token, $token);
             $stmt->execute();
 
-            // Enviar correo con el enlace de restablecimiento
-            $resetLink = "http://localhost/reset_password.php?token=" . $token; // Ajusta la URL según tu dominio
-            $subject = translate('Restablecer tu contraseña - Climas del Norte');
-            $message = translate('Hola,') . "\n\n" .
-                       translate('Hemos recibido una solicitud para restablecer tu contraseña. Haz clic en el siguiente enlace para continuar:') . "\n" .
-                       $resetLink . "\n\n" .
-                       translate('Si no solicitaste esto, ignora este correo.') . "\n\n" .
-                       translate('Saludos,') . "\n" .
-                       "Climas del Norte";
-            $headers = "From: no-reply@climasdelnorte.com\r\n" .
-                       "Reply-To: no-reply@climasdelnorte.com\r\n" .
-                       "Content-Type: text/plain; charset=UTF-8\r\n";
+            // Enviar correo con PHPMailer
+            $mail = new PHPMailer(true);
+            try {
+                $mail->isSMTP();
+                $mail->Host = 'localhost';
+                $mail->Port = 1025;
+                $mail->SMTPAuth = false;
+                $mail->SMTPSecure = '';
 
-            if (mail($email, $subject, $message, $headers)) {
+                $mail->setFrom('no-reply@climasdelnorte.com', 'Climas del Norte');
+                $mail->addAddress($email);
+                $mail->Subject = translate('Restablecer tu contraseña - Climas del Norte');
+                $mail->Body = translate('Hola,') . "\n\n" .
+                              translate('Hemos recibido una solicitud para restablecer tu contraseña. Haz clic en el siguiente enlace para continuar:') . "\n" .
+                              "http://localhost/UT/ANTONIO/CDN/reset_password.php?token=" . $token . "\n\n" .
+                              translate('Si no solicitaste esto, ignora este correo.') . "\n\n" .
+                              translate('Saludos,') . "\n" .
+                              "Climas del Norte";
+
+                $mail->send();
                 $success = translate('Se ha enviado un enlace de restablecimiento a tu correo. Revisa tu bandeja de entrada o spam.');
                 $email = '';
-            } else {
-                $error = translate('Error al enviar el correo. Intenta de nuevo más tarde.');
+            } catch (Exception $e) {
+                $error = translate('Error al enviar el correo: ') . $mail->ErrorInfo;
             }
         } else {
             $error = translate('No existe una cuenta asociada a este correo.');

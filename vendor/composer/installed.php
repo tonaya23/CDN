@@ -3,7 +3,7 @@
         'name' => 'tonay/cdn',
         'pretty_version' => 'dev-master',
         'version' => 'dev-master',
-        'reference' => '3f4513cdeb1e320fb6df714a51f59333e143d0ae',
+        'reference' => 'c5b48839b68d4cdd976d5fa0f0dd6cd2c5a9b671',
         'type' => 'library',
         'install_path' => __DIR__ . '/../../',
         'aliases' => array(),
@@ -72,6 +72,15 @@
             'install_path' => __DIR__ . '/../phar-io/version',
             'aliases' => array(),
             'dev_requirement' => true,
+        ),
+        'phpmailer/phpmailer' => array(
+            'pretty_version' => 'v6.9.3',
+            'version' => '6.9.3.0',
+            'reference' => '2f5c94fe7493efc213f643c23b1b1c249d40f47e',
+            'type' => 'library',
+            'install_path' => __DIR__ . '/../phpmailer/phpmailer',
+            'aliases' => array(),
+            'dev_requirement' => false,
         ),
         'phpunit/php-code-coverage' => array(
             'pretty_version' => '11.0.9',
@@ -355,7 +364,7 @@
         'tonay/cdn' => array(
             'pretty_version' => 'dev-master',
             'version' => 'dev-master',
-            'reference' => '3f4513cdeb1e320fb6df714a51f59333e143d0ae',
+            'reference' => 'c5b48839b68d4cdd976d5fa0f0dd6cd2c5a9b671',
             'type' => 'library',
             'install_path' => __DIR__ . '/../../',
             'aliases' => array(),
