@@ -36,6 +36,14 @@ function translate($text) {
     }
 }
 
+// Cerrar sesión
+if (isset($_GET['logout'])) {
+    unset($_SESSION['usuario_id']);
+    unset($_SESSION['usuario_nombre']);
+    header("Location: index.php");
+    exit;
+}
+
 // Inicializar el carrito si no existe
 if (!isset($_SESSION['carrito'])) {
     $_SESSION['carrito'] = [];
@@ -43,52 +51,118 @@ if (!isset($_SESSION['carrito'])) {
 
 // Vaciar el carrito completamente
 if (isset($_GET['vaciar'])) {
-$_SESSION['carrito'] = [];
-header("Location: index.php");
-exit;
+    $_SESSION['carrito'] = [];
+    header("Location: index.php");
+    exit;
 }
 
 // Manejar agregar al carrito
 if (isset($_GET['agregar']) && !empty($_GET['agregar'])) {
-$servicio = $_GET['agregar'];
-$precio = 0;
+    $servicio = $_GET['agregar'];
+    $precio = 0;
 
-// Asignar precios según el servicio
-switch ($servicio) {
-case 'Reparacion':
-$precio = 1500;
-break;
-case 'Instalacion':
-$precio = 2500;
-break;
-case 'Mantenimiento':
-$precio = 800;
-break;
-}
+    // Asignar precios según el servicio
+    switch ($servicio) {
+        case 'Reparacion':
+            $precio = 1500;
+            break;
+        case 'Instalacion':
+            $precio = 2500;
+            break;
+        case 'Mantenimiento':
+            $precio = 800;
+            break;
+    }
 
-// Agregar al carrito
-$_SESSION['carrito'][] = [
-'servicio' => $servicio,
-'precio' => $precio
-];
+    // Agregar al carrito
+    $_SESSION['carrito'][] = [
+        'servicio' => $servicio,
+        'precio' => $precio
+    ];
 
-// Redirigir a la sección de contacto
-header("Location: index.php#contacto");
-exit;
+    // Redirigir a la sección de contacto
+    header("Location: index.php#contacto");
+    exit;
 }
 
 // Eliminar un elemento del carrito
 if (isset($_GET['eliminar']) && is_numeric($_GET['eliminar']) && isset($_SESSION['carrito'][$_GET['eliminar']])) {
-unset($_SESSION['carrito'][$_GET['eliminar']]);
-$_SESSION['carrito'] = array_values($_SESSION['carrito']); // Reindexar el array
-header("Location: index.php#contacto");
-exit;
+    unset($_SESSION['carrito'][$_GET['eliminar']]);
+    $_SESSION['carrito'] = array_values($_SESSION['carrito']); // Reindexar el array
+    header("Location: index.php#contacto");
+    exit;
 }
 
 // Calcular total
 $total = 0;
 foreach ($_SESSION['carrito'] as $item) {
     $total += $item['precio'];
+}
+
+// Procesar el formulario cuando se envía
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Verificar que el usuario esté logueado para procesar el pedido
+    if (!isset($_SESSION['usuario_id'])) {
+        // Guardar la página de retorno
+        $_SESSION['redirect_after_login'] = 'index.php#contacto';
+        header("Location: login.php");
+        exit;
+    }
+    
+    // Conexión a la base de datos
+    $conn = new mysqli("localhost", "root", "", "cdn_servicios");
+    
+    // Verificar conexión
+    if ($conn->connect_error) {
+        die("Error de conexión: " . $conn->connect_error);
+    }
+    
+    // Obtener datos del formulario
+    $nombre = $_POST['nombre'];
+    $email = $_POST['email'];
+    $telefono = $_POST['telefono'];
+    $mensaje = $_POST['mensaje'];
+    $usuario_id = $_SESSION['usuario_id'];
+    
+    // Insertar cliente o actualizar si existe
+    $sql = "INSERT INTO clientes (usuario_id, nombre, email, telefono) VALUES (?, ?, ?, ?)";
+    $stmt = $conn->prepare($sql);
+    $stmt->bind_param("isss", $usuario_id, $nombre, $email, $telefono);
+    $stmt->execute();
+    $cliente_id = $conn->insert_id;
+    
+    // Verificar si hay servicios en el carrito
+    if (!empty($_SESSION['carrito'])) {
+        // Calcular total
+        $total = 0;
+        foreach ($_SESSION['carrito'] as $item) {
+            $total += $item['precio'];
+        }
+        
+        // Crear pedido
+        $sql = "INSERT INTO pedidos (usuario_id, cliente_id, total) VALUES (?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        $stmt->bind_param("iid", $usuario_id, $cliente_id, $total);
+        $stmt->execute();
+        $pedido_id = $conn->insert_id;
+        
+        // Insertar detalles del pedido
+        $sql = "INSERT INTO detalle_pedidos (pedido_id, servicio, precio) VALUES (?, ?, ?)";
+        $stmt = $conn->prepare($sql);
+        
+        foreach ($_SESSION['carrito'] as $item) {
+            $stmt->bind_param("isd", $pedido_id, $item['servicio'], $item['precio']);
+            $stmt->execute();
+        }
+        
+        // Limpiar carrito
+        $_SESSION['carrito'] = [];
+        
+        // Mensaje de éxito
+        $mensaje_exito = "¡Gracias por tu solicitud! Nos pondremos en contacto contigo pronto.";
+    }
+    
+    $conn->close();
 }
 ?>
 <!DOCTYPE html>
@@ -125,6 +199,16 @@ foreach ($_SESSION['carrito'] as $item) {
                     <li><a href="#galeria"><?= translate('Galería') ?></a></li>
                     <li><a href="#testimonios"><?= translate('Testimonios') ?></a></li>
                     <li><a href="#contacto"><?= translate('Contacto') ?></a></li>
+                    <?php if (isset($_SESSION['usuario_id'])): ?>
+                    <li class="user-menu">
+                        <a href="#"><i class="fas fa-user"></i> <?= $_SESSION['usuario_nombre'] ?></a>
+                        <div class="user-dropdown">
+                            <a href="?logout"><?= translate('Cerrar Sesión') ?></a>
+                        </div>
+                    </li>
+                    <?php else: ?>
+                    <li><a href="login.php"><?= translate('Iniciar Sesión') ?></a></li>
+                    <?php endif; ?>
                     <li class="cart-icon" id="cart-icon">
                         <i class="fas fa-shopping-cart"></i>
                         <span class="cart-count"><?php echo count($_SESSION['carrito']); ?></span>
@@ -151,13 +235,17 @@ foreach ($_SESSION['carrito'] as $item) {
                                 <span>$<?php echo number_format($total, 2); ?></span>
                             </div>
                             <div style="text-align: center; margin-top: 15px;">
+                                <?php if (isset($_SESSION['usuario_id'])): ?>
                                 <a href="#contacto" class="add-to-cart"><?= translate('Completar Solicitud') ?></a>
+                                <?php else: ?>
+                                <a href="login.php"
+                                    class="add-to-cart"><?= translate('Iniciar Sesión para Continuar') ?></a>
+                                <?php endif; ?>
                             </div>
                             <?php endif; ?>
                             <?php if (!empty($_SESSION['carrito'])): ?>
                             <div style="text-align: center; margin-top: 10px;">
                                 <a href="?vaciar" class="clear-cart"><?= translate('Vaciar carrito') ?></a>
-
                             </div>
                             <?php endif; ?>
                         </div>
@@ -361,7 +449,8 @@ foreach ($_SESSION['carrito'] as $item) {
                         <img src="img/clientefiel.jpg" alt="Cliente 1">
                     </div>
                     <p class="testimonial-text">
-                        <?= translate('"Excelente servicio, muy profesionales y puntuales. Totalmente recomendados."') ?></p>
+                        <?= translate('"Excelente servicio, muy profesionales y puntuales. Totalmente recomendados."') ?>
+                    </p>
                     <h4>Juan Pérez</h4>
                     <p class="testimonial-role"><?= translate('Cliente Residencial') ?></p>
                 </div>
@@ -369,68 +458,10 @@ foreach ($_SESSION['carrito'] as $item) {
         </div>
     </section>
 
-    <?php
-// Procesar el formulario cuando se envía
-if ($_SERVER["REQUEST_METHOD"] == "POST") {
-    // Conexión a la base de datos
-    $conn = new mysqli("localhost", "root", "", "cdn_servicios");
-    
-    // Verificar conexión
-    if ($conn->connect_error) {
-        die("Error de conexión: " . $conn->connect_error);
-    }
-    
-    // Obtener datos del formulario
-    $nombre = $_POST['nombre'];
-    $email = $_POST['email'];
-    $telefono = $_POST['telefono'];
-    $mensaje = $_POST['mensaje'];
-    
-    // Insertar cliente
-    $sql = "INSERT INTO clientes (nombre, email, telefono) VALUES (?, ?, ?)";
-    $stmt = $conn->prepare($sql);
-    $stmt->bind_param("sss", $nombre, $email, $telefono);
-    $stmt->execute();
-    $cliente_id = $conn->insert_id;
-    
-    // Verificar si hay servicios en el carrito
-    if (!empty($_SESSION['carrito'])) {
-        // Calcular total
-        $total = 0;
-        foreach ($_SESSION['carrito'] as $item) {
-            $total += $item['precio'];
-        }
-        
-        // Crear pedido
-        $sql = "INSERT INTO pedidos (cliente_id, total) VALUES (?, ?)";
-        $stmt = $conn->prepare($sql);
-        $stmt->bind_param("id", $cliente_id, $total);
-        $stmt->execute();
-        $pedido_id = $conn->insert_id;
-        
-        // Insertar detalles del pedido
-        $sql = "INSERT INTO detalle_pedidos (pedido_id, servicio, precio) VALUES (?, ?, ?)";
-        $stmt = $conn->prepare($sql);
-        
-        foreach ($_SESSION['carrito'] as $item) {
-            $stmt->bind_param("isd", $pedido_id, $item['servicio'], $item['precio']);
-            $stmt->execute();
-        }
-        
-        // Limpiar carrito
-        $_SESSION['carrito'] = [];
-        
-        // Mensaje de éxito
-        $mensaje_exito = "¡Gracias por tu solicitud! Nos pondremos en contacto contigo pronto.";
-    }
-    
-    $conn->close();
-}
-?>
     <section class="contact scroll-animation" id="contacto">
         <div class="container">
             <h2 class="section-title"><?= translate('Contáctanos') ?></h2>
-            =
+
             <?php if(isset($mensaje_exito)): ?>
             <div class="success-message">
                 <?php echo $mensaje_exito; ?>
@@ -439,7 +470,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             <div class="contact-grid">
                 <div class="contact-info">
-                    <!-- Información de contacto - sin cambios -->
                     <div class="contact-item">
                         <div class="contact-icon">
                             <i class="fas fa-phone"></i>
@@ -458,7 +488,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <h3><?= translate('Dirección') ?></h3>
                             <p><?= translate('Venustiano Carranza No. 909 Col. Villa de Fuente. Piedras Negras Coah. MX') ?>
                             </p>
-                            <p><?= translate('Sucursal: Lib. Armando Treviño 704 Col. Guillén. Piedras Negras Coah. MX') ?></p>
+                            <p><?= translate('Sucursal: Lib. Armando Treviño 704 Col. Guillén. Piedras Negras Coah. MX') ?>
+                            </p>
                         </div>
                     </div>
                     <div class="contact-item">
@@ -487,12 +518,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                 </div>
 
+                <!-- Verificación de usuario para mostrar el formulario -->
+                <?php if(isset($_SESSION['usuario_id'])): ?>
                 <form class="contact-form" method="POST" action="index.php#contacto"
                     onsubmit="return validarFormulario()">
                     <div class="form-group">
-                        <input type="text" name="nombre" class="form-control" placeholder="<?= translate('Nombre completo') ?>"
-                            required minlength="3" maxlength="50" pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+"
-                            title="<?= translate('Solo letras y espacios') ?>">
+                        <input type="text" name="nombre" class="form-control"
+                            placeholder="<?= translate('Nombre completo') ?>" required minlength="3" maxlength="50"
+                            pattern="[A-Za-záéíóúÁÉÍÓÚñÑ\s]+" title="<?= translate('Solo letras y espacios') ?>">
                         <small class="error-message" id="nombre-error"></small>
                     </div>
                     <div class="form-group">
@@ -502,8 +535,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         <small class="error-message" id="email-error"></small>
                     </div>
                     <div class="form-group">
-                        <input type="tel" name="telefono" class="form-control" placeholder="<?= translate('Teléfono') ?>"
-                            required pattern="[0-9]{10}" title="<?= translate('10 dígitos sin espacios') ?>">
+                        <input type="tel" name="telefono" class="form-control"
+                            placeholder="<?= translate('Teléfono') ?>" required pattern="[0-9]{10}"
+                            title="<?= translate('10 dígitos sin espacios') ?>">
                         <small class="error-message" id="telefono-error"></small>
                     </div>
 
@@ -532,6 +566,20 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
                     <button type="submit" class="cta-button"><?= translate('Enviar Solicitud') ?></button>
                 </form>
+                <?php else: ?>
+                <div class="login-required">
+                    <div class="login-message">
+                        <i class="fas fa-lock"></i>
+                        <h3><?= translate('Inicia sesión para completar tu solicitud') ?></h3>
+                        <p><?= translate('Para poder enviar una solicitud de servicio, debes iniciar sesión o crear una cuenta.') ?>
+                        </p>
+                        <div class="login-buttons">
+                            <a href="login.php" class="cta-button"><?= translate('Iniciar Sesión') ?></a>
+                            <a href="register.php" class="secondary-button"><?= translate('Crear Cuenta') ?></a>
+                        </div>
+                    </div>
+                </div>
+                <?php endif; ?>
             </div>
         </div>
     </section>

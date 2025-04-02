@@ -1,0 +1,101 @@
+ hice esta consulta (prompt) para mi pagina "a mi pagina actual necesito que para que alguien pueda hacer un pedido y completar la solicitud necesite primero iniciar sesión, es decir iniciar sesión o crearse una cuenta en todo caso, si es el caso ese necesito una pagina para eso, entonces puedes hacer que cuando se intente realizar un pedido desde la parte de "Contactanos" donde dice "completar solicitud" me pida primero iniciar sesión y si ya tengo iniciada una sesión que me deje seguir todo con normalidad, Entonces, asegúrate de modificar correctamente mi bd, además haz que los pedidos estén linkeados directamente a cada usuario, y que un usuario pueda hacer diferentes pedidos etc. también asegúrate de que también puedan poner su teléfono al crear la cuenta, ya que esto lo quiero para una futura opción para poder recuperar su cuenta con su teléfono, pero eso déjalo para después, por ahora también asegúrate de que algunos datos sean requeridos obligatoriamente para crear la cuenta y tambien que haya un formato de datos, como por ejemplo que el correo lleve el @ forzosamente etc... o que la contraseña tenga una log minima y maxima etc. y tambien que haya mensajes de error simples..." y la ia ya me dio la pagina de inicio de sesion (login.php), la bd actualizada y la pagina de registro (register.php), pero la pagina index actualizada no, podrias continuarla? solo medio esto: <?php
+session_start();
+// Configuración de idioma
+if (!isset($_SESSION['lang'])) {
+    $_SESSION['lang'] = 'es'; // Idioma por defecto
+}
+if (isset($_GET['lang']) && in_array($_GET['lang'], ['es', 'en'])) {
+    $_SESSION['lang'] = $_GET['lang'];
+    header("Location: ".strtok($_SERVER['REQUEST_URI'], '?')); // Elimina parámetros de URL
+    exit;
+}
+// Carga el autoload de Composer
+require_once 'vendor/autoload.php';
+// Función de traducción automática
+function translate($text) {
+    static $translator = null;
+
+    if ($_SESSION['lang'] == 'es') {
+        return $text; // No traducir si ya está en español
+    }
+
+    if ($translator === null) {
+        $translator = new Stichoza\GoogleTranslate\GoogleTranslate();
+        $translator->setSource('es');
+        $translator->setTarget($_SESSION['lang']);
+    }
+
+    try {
+        return $translator->translate($text);
+    } catch (Exception $e) {
+        return $text; // Si falla la traducción, devuelve el texto original
+    }
+}
+// Inicializar el carrito si no existe
+if (!isset($_SESSION['carrito'])) {
+    $_SESSION['carrito'] = [];
+}
+// Cerrar sesión
+if (isset($_GET['logout'])) {
+    unset($_SESSION['usuario_id']);
+    unset($_SESSION['usuario_nombre']);
+    header("Location: index.php");
+    exit;
+}
+// Vaciar el carrito completamente
+if (isset($_GET['vaciar'])) {
+    $_SESSION['carrito'] = [];
+    header("Location: index.php");
+    exit;
+}
+// Manejar agregar al carrito
+if (isset($_GET['agregar']) && !empty($_GET['agregar'])) {
+    $servicio = $_GET['agregar'];
+    $precio = 0;
+    // Asignar precios según el servicio
+    switch ($servicio) {
+        case 'Reparacion':
+            $precio = 1500;
+            break;
+        case 'Instalacion':
+            $precio = 2500;
+            break;
+        case 'Mantenimiento':
+            $precio = 800;
+            break;
+    }
+    // Agregar al carrito
+    $_SESSION['carrito'][] = [
+        'servicio' => $servicio,
+        'precio' => $precio
+    ];
+    // Redirigir a la sección de contacto
+    header("Location: index.php#contacto");
+    exit;
+}
+// Eliminar un elemento del carrito
+if (isset($_GET['eliminar']) && is_numeric($_GET['eliminar']) && isset($_SESSION['carrito'][$_GET['eliminar']])) {
+    unset($_SESSION['carrito'][$_GET['eliminar']]);
+    $_SESSION['carrito'] = array_values($_SESSION['carrito']); // Reindexar el array
+    header("Location: index.php#contacto");
+    exit;
+}
+// Calcular total
+$total = 0;
+foreach ($_SESSION['carrito'] as $item) {
+    $total += $item['precio'];
+}
+// Procesar el formulario cuando se envía
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Verificar que el usuario esté logueado para procesar el pedido
+    if (!isset($_SESSION['usuario_id'])) {
+        // Guardar la página de retorno
+        $_SESSION['redirect_after_login'] = 'index.php#contacto';
+        header("Location: login.php");
+        exit;
+    }
+
+    // Conexión a la base de datos
+    $conn = new mysqli. ESTA ES MI PAGINA ACTUAL el index.
+    
+    no me des toda la pagina corregida, solo dame lo que tengo que quitar o agregar y si tengo que agregar código dime donde de ponerlo y listo.

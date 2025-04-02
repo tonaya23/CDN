@@ -852,6 +852,41 @@ footer {
     color: var(--text-color);
 }
 
+.user-menu {
+    margin-left: 15px;
+    display: flex;
+    align-items: center;
+}
+
+.user-menu span {
+    margin-right: 10px;
+    color: #fff;
+}
+
+.logout-link {
+    color: #fff;
+    font-size: 18px;
+}
+
+.login-required-message {
+    background-color: #f8d7da;
+    color: #721c24;
+    padding: 15px;
+    border-radius: 5px;
+    margin-bottom: 20px;
+    text-align: center;
+}
+
+.cta-button-small {
+    display: inline-block;
+    background-color: #3498db;
+    color: white;
+    padding: 5px 15px;
+    border-radius: 4px;
+    margin-left: 10px;
+    text-decoration: none;
+}
+
 @media (max-width: 768px) {
     .pillars-grid {
         grid-template-columns: 1fr;
